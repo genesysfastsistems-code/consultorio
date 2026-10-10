@@ -837,7 +837,7 @@ function dResumen(){
 function dEmpresas(){
   const es=empList(),cnt={};Object.values(P.users).forEach(u=>{if(u.empresaId)cnt[u.empresaId]=(cnt[u.empresaId]||0)+1});
   return `<div class="vh"><h1>Consultorios</h1><button class="btn p" data-a="nemp">${ic('mas')}Nuevo consultorio</button></div>
-  <div class="panel">${es.length?`<div class="scroll"><table><thead><tr><th>Consultorio</th><th>Contacto</th><th>Plan</th><th>Estado</th><th>Usuarios</th><th></th></tr></thead><tbody>${es.map(e=>{const s=estEmp(e);return `<tr><td><b>${esc(e.nombre)}</b><div class="muted small">${esc(e.ruc||'')}</div></td><td>${esc(e.contacto||'')}<div class="muted small">${esc(e.tel||'')}</div></td><td>${esc(e.planNombre||'—')}</td><td><span class="pill ${s[1]}">${s[0]}</span></td><td>${cnt[e.id]||0} / ${e.maxUsuarios||'∞'}</td><td><div class="row"><button class="btn s p" data-a="npago" data-id="${e.id}">Registrar pago</button><button class="btn s" data-a="eemp" data-id="${e.id}">Editar</button><button class="btn s" data-a="uemp" data-id="${e.id}">Usuarios</button><button class="btn s ${e.estado==='activa'?'d':''}" data-a="togemp" data-id="${e.id}" ${e.estado==='activa'?'data-confirm="Confirmar suspensión"':''}>${e.estado==='activa'?'Suspender':'Reactivar'}</button></div></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">Todavía no hay consultorios. Creá el primero con “Nuevo consultorio”: se genera la empresa y el usuario administrador con contraseña temporal.</p>'}</div>
+  <div class="panel">${es.length?`<div class="scroll"><table><thead><tr><th>Consultorio</th><th>Contacto</th><th>Plan</th><th>Estado</th><th>Usuarios</th><th></th></tr></thead><tbody>${es.map(e=>{const s=estEmp(e);return `<tr><td><b>${esc(e.nombre)}</b><div class="muted small">${esc(e.ruc||'')}</div></td><td>${esc(e.contacto||'')}<div class="muted small">${esc(e.tel||'')}</div></td><td>${esc(e.planNombre||'—')}</td><td><span class="pill ${s[1]}">${s[0]}</span></td><td>${cnt[e.id]||0} / ${e.maxUsuarios||'∞'}</td><td><div class="row"><button class="btn s p" data-a="npago" data-id="${e.id}">Registrar pago</button><button class="btn s" data-a="eemp" data-id="${e.id}">Editar</button><button class="btn s" data-a="uemp" data-id="${e.id}">Usuarios</button><button class="btn s ${e.estado==='activa'?'d':''}" data-a="togemp" data-id="${e.id}" ${e.estado==='activa'?'data-confirm="Confirmar suspensión"':''}>${e.estado==='activa'?'Suspender':'Reactivar'}</button><button class="btn s d" data-a="delemp" data-id="${e.id}" data-confirm="Confirmar: eliminar consultorio y usuarios">Eliminar</button></div></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">Todavía no hay consultorios. Creá el primero con “Nuevo consultorio”: se genera la empresa y el usuario administrador con contraseña temporal.</p>'}</div>
   <p class="small muted">Por privacidad médica, el desarrollador administra cuentas y membresías pero no puede leer pacientes ni historiales de ningún consultorio.</p>`;
 }
 const planOpts=sel=>Object.entries(P.planes).filter(([,p])=>p.activo!==false).map(([id,p])=>`<option value="${id}" ${sel===id?'selected':''}>${esc(p.nombre)} · ${gs(p.precio)}</option>`).join('');
@@ -870,7 +870,7 @@ function empUsers(eid){
   const us=Object.entries(P.users).filter(([,u])=>u.empresaId===eid);
   modal(`<h2>Usuarios · ${esc(P.emp[eid].nombre)}</h2>
   ${us.length?`<div class="scroll"><table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th></th></tr></thead><tbody>${us.map(([id,u])=>`<tr><td>${esc(u.nombre||'')}</td><td>${esc(uName(u))}</td><td>${ROLN[u.rol]||''}${u.activo===false?' · desactivado':''}</td><td><div class="row">${conCorreo(u)?`<button class="btn s" data-a="resetu" data-email="${esc(u.email)}">Enviar correo de restablecimiento</button>`:''}<button class="btn s" data-a="passdev" data-id="${id}">Nueva contraseña</button><button class="btn s" data-a="togudev" data-id="${id}" data-eid="${eid}">${u.activo===false?'Activar':'Desactivar'}</button><button class="btn s d" data-a="deludev" data-id="${id}" data-eid="${eid}" data-confirm="Confirmar: eliminar">Eliminar</button></div></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Este consultorio no tiene usuarios.</p>'}
-  <p class="small muted">“Nueva contraseña” genera una clave temporal para ese usuario; deberá cambiarla al ingresar. “Eliminar” quita el acceso y libera el nombre de usuario.</p><div class="row"><button class="btn p" data-a="nuserdev" data-id="${eid}">Agregar usuario</button><button class="btn" data-a="close">Cerrar</button></div>`);
+  <p class="small muted">“Nueva contraseña” genera una clave temporal para ese usuario; deberá cambiarla al ingresar. “Eliminar” quita el acceso y libera el nombre de usuario; si es el último usuario, también se elimina el consultorio.</p><div class="row"><button class="btn p" data-a="nuserdev" data-id="${eid}">Agregar usuario</button><button class="btn" data-a="close">Cerrar</button></div>`);
 }
 function dPlanes(){
   const ps=Object.entries(P.planes);
@@ -958,7 +958,17 @@ const A={
     <label>Usuario<input value="${esc(uName(u))}" id="pd_us" disabled></label><label>Contraseña temporal nueva<input name="pass" id="pd_pass" required minlength="6" value="${tmpPass()}"></label>
     <p class="full small muted">La contraseña anterior deja de funcionar. El usuario deberá crear la suya al ingresar.</p>
     <div class="full row"><button class="btn p">Generar acceso</button><button type="button" class="btn" data-a="uemp" data-id="${esc(u.empresaId)}">Volver</button></div></form>`)},
-  async deludev(d){const u=P.users[d.id],us=uName(u),b=fs.batch();b.delete(fs.doc('usuarios/'+d.id));if(us)b.delete(fs.doc('logins/'+us));try{await b.commit();delete P.users[d.id];empUsers(d.eid);toast('Usuario eliminado')}catch(e){werr(e)}},
+  async deludev(d){
+    const u=P.users[d.id],us=uName(u),ultimo=!Object.entries(P.users).some(([id,x])=>id!==d.id&&x.empresaId===d.eid),b=fs.batch();
+    b.delete(fs.doc('usuarios/'+d.id));if(us)b.delete(fs.doc('logins/'+us));if(ultimo)b.delete(fs.doc('empresas/'+d.eid));
+    try{await b.commit();delete P.users[d.id];if(ultimo){delete P.emp[d.eid];closeM();draw();toast('Usuario eliminado. Era el último, así que también se eliminó el consultorio.')}else{empUsers(d.eid);toast('Usuario eliminado')}}catch(e){werr(e)}
+  },
+  async delemp(d){
+    const e=P.emp[d.id],b=fs.batch();
+    Object.entries(P.users).forEach(([id,u])=>{if(u.empresaId===d.id){b.delete(fs.doc('usuarios/'+id));const us=uName(u);if(us)b.delete(fs.doc('logins/'+us))}});
+    b.delete(fs.doc('empresas/'+d.id));
+    try{await b.commit();toast('Consultorio “'+e.nombre+'” y sus usuarios eliminados')}catch(x){werr(x)}
+  },
   async togudev(d){const u=P.users[d.id];try{await fs.doc('usuarios/'+d.id).update({activo:u.activo===false});P.users[d.id].activo=u.activo===false;empUsers(d.eid)}catch(e){werr(e)}},
   async resetu(d){try{await auth.sendPasswordResetEmail(d.email);toast('Correo de restablecimiento enviado a '+d.email)}catch(e){toast(authMsg(e),1)}},
   nplan(){planForm()},
