@@ -749,7 +749,7 @@ function vConfig(){
     <div class="full"><button class="btn p">Guardar datos</button></div></form></div>
   <div class="panel"><div class="vh"><h2>Usuarios del consultorio</h2><button class="btn p" data-a="nuser">${ic('mas')}Agregar usuario</button></div>
     <div class="scroll"><table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th></th></tr></thead><tbody>${us.map(([id,u])=>`<tr><td>${esc(u.nombre||'')}</td><td>${esc(uName(u))}</td><td>${ROLN[u.rol]||''}</td><td><span class="pill ${u.activo===false?'e-ausente':'e-atendido'}">${u.activo===false?'Desactivado':'Activo'}</span></td><td>${id===ME.uid?'':`<div class="row"><button class="btn s" data-a="rolu" data-id="${id}">Cambiar rol</button><button class="btn s" data-a="togu" data-id="${id}">${u.activo===false?'Activar':'Desactivar'}</button></div>`}</td></tr>`).join('')}</tbody></table></div>
-    <p class="small muted">Si alguien olvida su contraseña: desactivá ese usuario y creale uno nuevo. Recepción ve agenda, contactos, caja y recordatorios. Médico además ve y edita historial, recetas y estudios. Administrador además gestiona usuarios, médicos y auditoría.</p></div>
+    <p class="small muted">Si alguien olvida su contraseña, tu proveedor del sistema le genera una nueva. Recepción ve agenda, contactos, caja y recordatorios. Médico además ve y edita historial, recetas y estudios. Administrador además gestiona usuarios, médicos y auditoría.</p></div>
   <div class="panel"><div class="vh"><h2>Médicos, firma y sello</h2><button class="btn p" data-a="nmed">${ic('mas')}Agregar médico</button></div>
     ${Object.keys(D.medicos).length?`<div class="scroll"><table><thead><tr><th>Nombre</th><th>Especialidad</th><th>Registro</th><th>Firma</th><th>Sello</th><th></th></tr></thead><tbody>${Object.entries(D.medicos).map(([id,m])=>{const f=D.firmas[id]||{};return `<tr><td>${esc(m.nombre)}</td><td>${esc(m.esp||'')}</td><td>${esc(m.reg||'')}</td><td>${f.firma?`<img class="sig" src="${f.firma}" alt="Firma">`:'—'}</td><td>${f.sello?`<img class="sig" src="${f.sello}" alt="Sello">`:'—'}</td><td><button class="btn s" data-a="emed" data-id="${id}">Editar</button></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">Agregá al menos un médico para asignar turnos y firmar recetas.</p>'}</div>
   <div class="panel"><h2>Datos de ejemplo</h2><p class="muted">Pacientes y turnos ficticios, marcados “(ejemplo)”, para probar el sistema.</p><div class="row"><button class="btn" data-a="demo">Cargar datos de ejemplo</button>${hayDemo?'<button class="btn d" data-a="deldemo" data-confirm="Confirmar: borrar ejemplos">Borrar datos de ejemplo</button>':''}</div></div>`;
@@ -771,11 +771,20 @@ function userForm(eid){
     <p class="full small muted">Entregale el nombre de usuario y esta contraseña temporal. El sistema le pedirá cambiarla en su primer ingreso. Usuario: 3 a 30 letras o números, sin espacios.</p>
     <div class="full row"><button class="btn p">Crear usuario</button><button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
 }
-async function crearUsuario(email,pass,doc){
-  const sec=firebase.apps.find(a=>a.name==='sec')||firebase.initializeApp(FB,'sec');
-  const c=await sec.auth().createUserWithEmailAndPassword(email,pass);await sec.auth().signOut();
-  await fs.doc('usuarios/'+c.user.uid).set(Object.assign({email:email.toLowerCase(),debeCambiar:true,activo:true,creado:Date.now()},doc));
-  return c.user.uid;
+async function cuentaDe(u){
+  u=String(u).trim().toLowerCase();if(u.includes('@'))return u;
+  try{const d=await fs.doc('logins/'+u).get();if(d.exists)return d.data().email}catch(e){}
+  return u+UDOM;
+}
+function cuentaSec(){return (firebase.apps.find(a=>a.name==='sec')||firebase.initializeApp(FB,'sec')).auth()}
+async function crearUsuario(us,pass,doc){
+  const lg=await fs.doc('logins/'+us).get();
+  if(lg.exists||Object.values(P.users).some(u=>uName(u)===us))throw{code:'auth/email-already-in-use'};
+  const email=us+'.'+nid()+UDOM,sec=cuentaSec(),c=await sec.createUserWithEmailAndPassword(email,pass);await sec.signOut();
+  const b=fs.batch();
+  b.set(fs.doc('usuarios/'+c.user.uid),Object.assign({creado:Date.now()},doc,{email,usuario:us,debeCambiar:true,activo:true}));
+  b.set(fs.doc('logins/'+us),{email,empresaId:doc.empresaId,uid:c.user.uid});
+  await b.commit();return c.user.uid;
 }
 function imgData(file,maxW,type,maxLen){return new Promise(res=>{if(!file||!file.size)return res(null);const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{let w=Math.min(maxW,im.width),u;do{const c=document.createElement('canvas');c.width=w;c.height=Math.round(im.height*w/im.width);const x=c.getContext('2d');if(type==='image/jpeg'){x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height)}x.drawImage(im,0,0,c.width,c.height);u=c.toDataURL(type,.8);w=Math.round(w*.75)}while(u.length>maxLen&&w>60);res(u)};im.onerror=()=>res(null);im.src=r.result};r.onerror=()=>res(null);r.readAsDataURL(file)})}
 const fileData=f=>new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>res(null);r.readAsDataURL(f)});
@@ -860,8 +869,8 @@ function pagoForm(eid){
 function empUsers(eid){
   const us=Object.entries(P.users).filter(([,u])=>u.empresaId===eid);
   modal(`<h2>Usuarios · ${esc(P.emp[eid].nombre)}</h2>
-  ${us.length?`<div class="scroll"><table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th></th></tr></thead><tbody>${us.map(([id,u])=>`<tr><td>${esc(u.nombre||'')}</td><td>${esc(uName(u))}</td><td>${ROLN[u.rol]||''}${u.activo===false?' · desactivado':''}</td><td><div class="row">${conCorreo(u)?`<button class="btn s" data-a="resetu" data-email="${esc(u.email)}">Enviar correo de restablecimiento</button>`:''}<button class="btn s ${u.activo===false?'':'d'}" data-a="togudev" data-id="${id}" data-eid="${eid}">${u.activo===false?'Activar':'Desactivar'}</button></div></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Este consultorio no tiene usuarios.</p>'}
-  <p class="small muted">Si alguien olvida su contraseña: desactivá ese usuario y creale uno nuevo con otra contraseña temporal.</p><div class="row"><button class="btn p" data-a="nuserdev" data-id="${eid}">Agregar usuario</button><button class="btn" data-a="close">Cerrar</button></div>`);
+  ${us.length?`<div class="scroll"><table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th></th></tr></thead><tbody>${us.map(([id,u])=>`<tr><td>${esc(u.nombre||'')}</td><td>${esc(uName(u))}</td><td>${ROLN[u.rol]||''}${u.activo===false?' · desactivado':''}</td><td><div class="row">${conCorreo(u)?`<button class="btn s" data-a="resetu" data-email="${esc(u.email)}">Enviar correo de restablecimiento</button>`:''}<button class="btn s" data-a="passdev" data-id="${id}">Nueva contraseña</button><button class="btn s" data-a="togudev" data-id="${id}" data-eid="${eid}">${u.activo===false?'Activar':'Desactivar'}</button><button class="btn s d" data-a="deludev" data-id="${id}" data-eid="${eid}" data-confirm="Confirmar: eliminar">Eliminar</button></div></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Este consultorio no tiene usuarios.</p>'}
+  <p class="small muted">“Nueva contraseña” genera una clave temporal para ese usuario; deberá cambiarla al ingresar. “Eliminar” quita el acceso y libera el nombre de usuario.</p><div class="row"><button class="btn p" data-a="nuserdev" data-id="${eid}">Agregar usuario</button><button class="btn" data-a="close">Cerrar</button></div>`);
 }
 function dPlanes(){
   const ps=Object.entries(P.planes);
@@ -897,7 +906,7 @@ const A={
   salir(){closeM();auth.signOut()},
   chpass(){cambiarScreen(false)},
   volver(){showApp()},
-  async olvide(){const em=$('#l_email').value.trim();if(!em){toast('Escribí tu usuario arriba y volvé a tocar el botón.',1);return}if(!em.includes('@')){toast('Pedile al administrador de tu consultorio que te genere un acceso nuevo.');return}try{await auth.sendPasswordResetEmail(em)}catch(e){}toast('Si el correo tiene un usuario, vas a recibir un enlace para crear una contraseña nueva.')},
+  async olvide(){const em=$('#l_email').value.trim();if(!em){toast('Escribí tu usuario arriba y volvé a tocar el botón.',1);return}if(!em.includes('@')){toast('Pedile a tu proveedor del sistema una contraseña nueva.');return}try{await auth.sendPasswordResetEmail(em)}catch(e){}toast('Si el correo tiene un usuario, vas a recibir un enlace para crear una contraseña nueva.')},
   close:closeM,
   agmodo(d){S.ag.modo=d.m;draw()},
   aghoy(){S.ag.f=hoy();draw()},
@@ -945,6 +954,11 @@ const A={
   npago(d){if(!Object.keys(P.planes).length){toast('Primero creá al menos una membresía.',1);return}pagoForm(d.id)},
   dpago(d){fs.doc('pagos/'+d.id).delete().catch(werr);toast('Pago anulado')},
   nuserdev(d){userForm(d.id)},
+  passdev(d){const u=P.users[d.id];modal(`<h2>Nueva contraseña · ${esc(u.nombre||uName(u))}</h2><form data-s="passdev" class="form"><input type="hidden" name="id" value="${d.id}">
+    <label>Usuario<input value="${esc(uName(u))}" id="pd_us" disabled></label><label>Contraseña temporal nueva<input name="pass" id="pd_pass" required minlength="6" value="${tmpPass()}"></label>
+    <p class="full small muted">La contraseña anterior deja de funcionar. El usuario deberá crear la suya al ingresar.</p>
+    <div class="full row"><button class="btn p">Generar acceso</button><button type="button" class="btn" data-a="uemp" data-id="${esc(u.empresaId)}">Volver</button></div></form>`)},
+  async deludev(d){const u=P.users[d.id],us=uName(u),b=fs.batch();b.delete(fs.doc('usuarios/'+d.id));if(us)b.delete(fs.doc('logins/'+us));try{await b.commit();delete P.users[d.id];empUsers(d.eid);toast('Usuario eliminado')}catch(e){werr(e)}},
   async togudev(d){const u=P.users[d.id];try{await fs.doc('usuarios/'+d.id).update({activo:u.activo===false});P.users[d.id].activo=u.activo===false;empUsers(d.eid)}catch(e){werr(e)}},
   async resetu(d){try{await auth.sendPasswordResetEmail(d.email);toast('Correo de restablecimiento enviado a '+d.email)}catch(e){toast(authMsg(e),1)}},
   nplan(){planForm()},
@@ -989,7 +1003,7 @@ const C={
 };
 document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.c;if(k&&C[k])C[k](e.target)});
 const F={
-  async login(v,form){const b=form.querySelector('button');b.disabled=true;try{await auth.signInWithEmailAndPassword(aEmail(v.email),v.pass)}catch(e){b.disabled=false;toast(authMsg(e),1)}},
+  async login(v,form){const b=form.querySelector('button');b.disabled=true;try{await auth.signInWithEmailAndPassword(await cuentaDe(v.email),v.pass)}catch(e){b.disabled=false;toast(authMsg(e),1)}},
   async cambiar(v){
     if(v.p1!==v.p2){toast('Las contraseñas no coinciden.',1);return}
     if(v.p1.length<8||v.p1==='123456'||/^(\d)\1+$/.test(v.p1)){toast('Elegí una contraseña más segura, de al menos 8 caracteres.',1);return}
@@ -1042,7 +1056,7 @@ const F={
   async user(v,form){
     const b=form.querySelector('button');b.disabled=true;
     const us=v.email.trim().toLowerCase();if(!uOk(us)){b.disabled=false;toast('El usuario debe tener 3 a 30 letras o números, sin espacios.',1);return}
-    try{await crearUsuario(aEmail(us),v.pass,{empresaId:v.eid,rol:v.rol,nombre:v.nombre.trim(),usuario:us});if(MODE==='app')log('Creó usuario',us+' · '+ROLN[v.rol]);closeM();modal(`<h2>Usuario creado</h2><div class="panel"><div>Usuario: <b>${esc(us)}</b></div><div>Contraseña temporal: <b>${esc(v.pass)}</b></div></div><p class="muted small">Deberá cambiar la contraseña en su primer ingreso.</p><div class="row"><button class="btn p" data-a="close">Listo</button></div>`)}
+    try{await crearUsuario(us,v.pass,{empresaId:v.eid,rol:v.rol,nombre:v.nombre.trim()});if(MODE==='app')log('Creó usuario',us+' · '+ROLN[v.rol]);closeM();modal(`<h2>Usuario creado</h2><div class="panel"><div>Usuario: <b>${esc(us)}</b></div><div>Contraseña temporal: <b>${esc(v.pass)}</b></div></div><p class="muted small">Deberá cambiar la contraseña en su primer ingreso.</p><div class="row"><button class="btn p" data-a="close">Listo</button></div>`)}
     catch(e){b.disabled=false;toast(e.code&&e.code.startsWith('auth/')?authMsg(e):'No se pudo crear el usuario.',1)}
   },
   async emp(v,form){
@@ -1052,7 +1066,7 @@ const F={
       const us=v.aemail.trim().toLowerCase();if(!uOk(us)){b.disabled=false;toast('El usuario debe tener 3 a 30 letras o números, sin espacios.',1);return}
       const pl=P.planes[v.plan],eid=nid(),vence=new Date(Date.now()+(+v.prueba||15)*864e5);
       await fs.doc('empresas/'+eid).set({nombre:v.nombre.trim(),ruc:v.ruc.trim(),contacto:v.contacto.trim(),tel:v.tel.trim(),planId:v.plan,planNombre:pl.nombre+' (prueba)',maxUsuarios:pl.maxUsuarios||0,estado:'activa',vence:firebase.firestore.Timestamp.fromDate(vence),creado:Date.now()});
-      try{await crearUsuario(aEmail(us),v.apass,{empresaId:eid,rol:'admin',nombre:v.anombre.trim(),usuario:us})}catch(e){await fs.doc('empresas/'+eid).delete();throw e}
+      try{await crearUsuario(us,v.apass,{empresaId:eid,rol:'admin',nombre:v.anombre.trim()})}catch(e){await fs.doc('empresas/'+eid).delete();throw e}
       closeM();modal(`<h2>Consultorio creado</h2><p>Entregale estos datos al administrador de <b>${esc(v.nombre)}</b>:</p><div class="panel"><div>Usuario: <b>${esc(us)}</b></div><div>Contraseña temporal: <b>${esc(v.apass)}</b></div></div><p class="muted small">El sistema le pedirá cambiar la contraseña en su primer ingreso. Período de prueba hasta el ${esc(vence.toLocaleDateString('es'))}.</p><div class="row"><button class="btn p" data-a="close">Listo</button></div>`);
     }catch(e){b.disabled=false;toast(e.code&&e.code.startsWith('auth/')?authMsg(e):'No se pudo guardar el consultorio.',1)}
   },
@@ -1063,6 +1077,19 @@ const F={
     b.set(fs.collection('pagos').doc(),{empresaId:v.eid,empresa:e.nombre,planId:v.plan,plan:pl.nombre,tipo:pl.tipo,monto:+v.monto||0,medio:v.medio,fecha:v.fecha,nota:v.nota.trim(),t:Date.now()});
     b.update(fs.doc('empresas/'+v.eid),{planId:v.plan,planNombre:pl.nombre,maxUsuarios:pl.maxUsuarios||0,vence,estado:'activa'});
     try{await b.commit();closeM();toast(pl.tipo==='unico'?'Pago único registrado: consultorio activo de por vida.':'Pago registrado. Vigente hasta el '+vence.toDate().toLocaleDateString('es')+'.')}catch(x){werr(x)}
+  },
+  async passdev(v,form){
+    const b=form.querySelector('button');b.disabled=true;
+    const old=P.users[v.id],us=uName(old);
+    try{
+      const email=us+'.'+nid()+UDOM,sec=cuentaSec(),c=await sec.createUserWithEmailAndPassword(email,v.pass);await sec.signOut();
+      const bt=fs.batch();
+      bt.set(fs.doc('usuarios/'+c.user.uid),Object.assign({},old,{email,usuario:us,debeCambiar:true,activo:true}));
+      bt.delete(fs.doc('usuarios/'+v.id));
+      bt.set(fs.doc('logins/'+us),{email,empresaId:old.empresaId,uid:c.user.uid});
+      await bt.commit();
+      modal(`<h2>Acceso generado</h2><div class="panel"><div>Usuario: <b>${esc(us)}</b></div><div>Contraseña temporal: <b>${esc(v.pass)}</b></div></div><p class="muted small">Entregale estos datos. Deberá cambiar la contraseña al ingresar.</p><div class="row"><button class="btn p" data-a="close">Listo</button></div>`);
+    }catch(e){b.disabled=false;toast(e.code&&e.code.startsWith('auth/')?authMsg(e):'No se pudo generar el acceso.',1)}
   },
   plan(v){const id=v.id||nid();fs.doc('planes/'+id).set({nombre:v.nombre.trim(),tipo:v.tipo,precio:+v.precio||0,maxUsuarios:+v.max||0,activo:v.activo==='1'}).catch(werr);closeM();toast('Membresía guardada')}
 };
