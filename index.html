@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Consultorio Médico</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+html,body{margin:0;height:100%}[hidden]{display:none!important}img{max-width:100%}
+
+/* Layout: barra lateral fija de módulos + área de trabajo; en móvil la barra pasa a una fila deslizable arriba. */
+:root{
+  --bg:#eaf0f1;--surface:#fbfdfd;--sunk:#f1f5f6;--ink:#14292e;--muted:#566b70;--line:#cfdadc;
+  --accent:#0b6a70;--accent-ink:#ffffff;--accent-soft:#d6ecec;
+  --warn-bg:#fdebb8;--warn-ink:#684700;--ok-bg:#cdeedb;--ok-ink:#0b5030;--bad-bg:#fbd3cd;--bad-ink:#8a1b11;
+  --shadow:0 1px 2px rgba(20,41,46,.08),0 6px 18px rgba(20,41,46,.06);
+  --display:"Bricolage Grotesque","Public Sans",system-ui,sans-serif;--body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0e191c;--surface:#17262a;--sunk:#122024;--ink:#e2eeef;--muted:#93a9ad;--line:#2b4046;
+  --accent:#54c3c6;--accent-ink:#04282a;--accent-soft:#17383b;
+  --warn-bg:#493a0b;--warn-ink:#ffdf8c;--ok-bg:#113f2b;--ok-ink:#a6e7c4;--bad-bg:#561c16;--bad-ink:#ffc2ba;
+  --shadow:0 1px 2px rgba(0,0,0,.4);color-scheme:dark}}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 var(--body);font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:26px}h2{font-size:17px}h3{font-size:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:100%}
+.side{background:var(--surface);border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:14px}
+.brand{font-family:var(--display);font-weight:700;font-size:17px;padding-inline:8px;line-height:1.1}
+.brand small{display:block;font:500 11px var(--body);color:var(--muted);margin-top:3px}
+nav{display:flex;flex-direction:column;gap:2px}
+nav button{all:unset;cursor:pointer;padding:8px 10px;border-radius:7px;font-weight:500;color:var(--muted);white-space:nowrap}
+nav button:hover{background:var(--sunk);color:var(--ink)}
+nav button[aria-current="page"]{background:var(--accent-soft);color:var(--ink);font-weight:700}
+.role{margin-top:auto;font-size:12px;color:var(--muted);padding-inline:8px;display:flex;flex-direction:column;gap:6px}
+.role b{color:var(--ink)}.role span{overflow-wrap:anywhere}
+main{padding:22px 24px 48px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.vh{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.grow{flex:1 1 180px;min-width:0}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:7px 12px;cursor:pointer;font-weight:600;text-decoration:none;color:var(--ink);display:inline-block}
+.btn:hover{border-color:var(--accent)}
+.btn.p{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.d{color:var(--bad-ink)}.btn.s{padding:4px 9px;font-size:12.5px}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+input,select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:7px 9px;max-width:100%}
+textarea{width:100%;min-height:64px;resize:vertical}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted)}
+label>input,label>select{width:100%}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.full{grid-column:1/-1}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.muted{color:var(--muted)}.small{font-size:12px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.n,th.n{text-align:right}
+.pill{display:inline-block;border-radius:99px;padding:1px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.e-pendiente{background:var(--warn-bg);color:var(--warn-ink)}
+.e-atendido{background:var(--ok-bg);color:var(--ok-ink)}
+.e-ausente{background:var(--bad-bg);color:var(--bad-ink)}
+.neutral{background:var(--sunk);color:var(--muted)}
+.banner{border-radius:8px;padding:9px 12px;background:var(--warn-bg);color:var(--warn-ink);font-weight:600}
+/* agenda */
+.slot{display:grid;grid-template-columns:52px minmax(0,1fr) 30px;gap:8px;align-items:start;border-bottom:1px solid var(--line);padding:4px 0;min-height:38px}
+.slot.over,.col2.over,.mc.over{background:var(--accent-soft)}
+.sh{color:var(--muted);font-weight:600;padding-top:6px}
+.sc{display:flex;flex-wrap:wrap;gap:6px}
+.add{all:unset;cursor:pointer;color:var(--muted);text-align:center;border-radius:6px;font-size:18px;line-height:28px}
+.add:hover{background:var(--accent-soft);color:var(--ink)}
+.tc{border-radius:7px;padding:5px 9px;cursor:grab;font-weight:600;max-width:100%;overflow-wrap:anywhere}
+.tc small{display:block;font-weight:500;opacity:.85}
+.tc .pg{font-weight:700;font-size:11px;margin-left:4px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(128px,1fr));gap:8px;min-width:920px}
+.col2{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px;display:flex;flex-direction:column;gap:6px;min-height:220px}
+.col2>button,.mc>button{all:unset;cursor:pointer;font-weight:700;font-size:12.5px}
+.col2.hoy,.mc.hoy{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.mc{background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:5px;min-height:84px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.mc .tc{padding:1px 5px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dow{font-size:11px;font-weight:700;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.06em}
+/* paciente */
+.alert{border-radius:9px;padding:11px 14px;font-weight:600}
+.alert b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.alert.r{background:var(--bad-bg);color:var(--bad-ink);border:2px solid var(--bad-ink)}
+.alert.y{background:var(--warn-bg);color:var(--warn-ink);border:2px solid var(--warn-ink)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px}
+.kv div{min-width:0;overflow-wrap:anywhere}.kv span{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tl{border-left:2px solid var(--line);margin-left:6px;padding-left:16px;display:flex;flex-direction:column;gap:10px}
+details{background:var(--sunk);border:1px solid var(--line);border-radius:9px;padding:9px 12px;position:relative}
+details::before{content:"";position:absolute;left:-23px;top:14px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+summary{cursor:pointer;font-weight:700}
+details>div{display:flex;flex-direction:column;gap:8px;padding-top:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--accent-soft);border-radius:6px;padding:2px 8px;font-size:12.5px;font-weight:600}
+.chip button{all:unset;cursor:pointer;margin-left:6px;font-weight:700}
+.sug{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:7px;max-height:180px;overflow:auto}
+.sug:empty{display:none}
+.sug button{all:unset;cursor:pointer;padding:6px 9px;border-bottom:1px solid var(--line)}
+.sug button:hover{background:var(--accent-soft)}
+.rx{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto;gap:6px;align-items:center}
+.thumb{width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+.bars{display:flex;align-items:flex-end;gap:3px;height:150px;border-bottom:1px solid var(--line)}
+.bars div{flex:1;background:var(--accent);border-radius:3px 3px 0 0;min-height:1px;position:relative}
+.bars div span{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted)}
+.axis{display:flex;gap:3px}.axis span{flex:1;text-align:center;font-size:10px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:var(--sunk);border-radius:9px;padding:10px 12px}.stat b{display:block;font:700 22px var(--display)}
+.stat span{font-size:12px;color:var(--muted);font-weight:600}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:20px;width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 32px);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(8,20,23,.55)}
+#dlgc{display:flex;flex-direction:column;gap:14px}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-weight:600;z-index:99;max-width:calc(100vw - 32px)}
+#toast.err{background:var(--bad-ink);color:var(--bad-bg)}
+img.sig{max-height:60px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px}
+@media (max-width:760px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{border-right:0;border-bottom:1px solid var(--line);padding:10px 16px;gap:8px}
+  nav{flex-direction:row;overflow-x:auto;padding-bottom:4px}
+  .role{flex-direction:row;flex-wrap:wrap;align-items:center;margin:0;padding:0}
+  main{padding:16px 16px 40px}
+  .rx{grid-template-columns:minmax(0,1fr)}
+  .mc{min-height:58px;padding:3px}.mc .tc{font-size:0;padding:3px;height:6px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.col{display:flex;flex-direction:column;gap:12px}
+#scr{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px;width:min(420px,100%);display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.card p{margin:0}code{background:var(--sunk);padding:1px 5px;border-radius:4px}
+.app{min-height:100vh}
+</style>
+</head>
+<body>
+<div id="scr"></div>
+<div class="app" id="app" hidden>
+  <aside class="side">
+    <div class="brand" id="brand"></div>
+    <nav id="nav" aria-label="Módulos"></nav>
+    <div class="role" id="role"></div>
+  </aside>
+  <main id="main"></main>
+</div>
+<dialog id="dlg"><div id="dlgc"></div></dialog>
+<div id="toast" hidden role="status"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ===== 1. PEGÁ ACÁ LA CONFIGURACIÓN DE TU PROYECTO DE FIREBASE (ver LEEME.md) ===== */
+const FB = {
+  apiKey: "AIzaSyBGOnOKEJhKrOL43ldbRrU8130J31MnXp0",
+  authDomain: "consultorio-medico-d325f.firebaseapp.com",
+  projectId: "consultorio-medico-d325f",
+  storageBucket: "consultorio-medico-d325f.firebasestorage.app",
+  messagingSenderId: "731065474407",
+  appId: "1:731065474407:web:581fea41eea67e7bd3e3c2"
+};
+/* ===== 2. Correo del desarrollador (debe ser el mismo que figura en firestore.rules) ===== */
+const DEV_EMAIL = "genesysfastsistems@gmail.com";
+</script>
+<script>
+"use strict";
+/* ---------- utilidades ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const p2=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+const pd=s=>{const a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])};
+const addD=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ymd(d)};
+const hoy=()=>ymd(new Date());
+const fdate=(s,o)=>s?pd(s).toLocaleDateString('es',o||{day:'2-digit',month:'short',year:'numeric'}):'—';
+const nid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const edad=n=>{if(!n)return'';const b=pd(n),t=new Date();let a=t.getFullYear()-b.getFullYear();if(t<new Date(t.getFullYear(),b.getMonth(),b.getDate()))a--;return a+' años'};
+function toast(m,err){const t=$('#toast');t.textContent=m;t.className=err?'err':'';t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,4200)}
+const tmpPass=()=>Math.random().toString(36).slice(2,6)+Math.floor(1000+Math.random()*9000);
+
+/* ---------- catálogos ---------- */
+const CIE=`A09|Diarrea y gastroenteritis de presunto origen infeccioso
+A90|Fiebre del dengue (dengue clásico)
+A91|Fiebre del dengue hemorrágico
+A92.0|Enfermedad por virus Chikungunya
+B34.9|Infección viral, no especificada
+B35.3|Tiña del pie
+B37.3|Candidiasis de la vulva y de la vagina
+B82.9|Parasitosis intestinal, sin otra especificación
+B86|Escabiosis
+D50.9|Anemia por deficiencia de hierro, sin otra especificación
+E03.9|Hipotiroidismo, no especificado
+E05.9|Tirotoxicosis, no especificada
+E10.9|Diabetes mellitus insulinodependiente, sin mención de complicación
+E11.9|Diabetes mellitus no insulinodependiente, sin mención de complicación
+E66.9|Obesidad, no especificada
+E78.0|Hipercolesterolemia pura
+E78.5|Hiperlipidemia no especificada
+E79.0|Hiperuricemia sin signos de artritis inflamatoria
+F32.9|Episodio depresivo, no especificado
+F41.1|Trastorno de ansiedad generalizada
+F41.9|Trastorno de ansiedad, no especificado
+F51.0|Insomnio no orgánico
+G43.9|Migraña, no especificada
+G44.2|Cefalea debida a tensión
+G56.0|Síndrome del túnel carpiano
+H10.9|Conjuntivitis, no especificada
+H52.1|Miopía
+H60.9|Otitis externa, sin otra especificación
+H65.9|Otitis media no supurativa, sin otra especificación
+H66.9|Otitis media, no especificada
+H81.1|Vértigo paroxístico benigno
+I10|Hipertensión esencial (primaria)
+I20.9|Angina de pecho, no especificada
+I25.9|Enfermedad isquémica crónica del corazón, no especificada
+I48|Fibrilación y aleteo auricular
+I50.9|Insuficiencia cardíaca, no especificada
+I83.9|Venas varicosas de los miembros inferiores sin úlcera ni inflamación
+J00|Rinofaringitis aguda (resfriado común)
+J01.9|Sinusitis aguda, no especificada
+J02.9|Faringitis aguda, no especificada
+J03.9|Amigdalitis aguda, no especificada
+J04.0|Laringitis aguda
+J06.9|Infección aguda de las vías respiratorias superiores, no especificada
+J11.1|Influenza con otras manifestaciones respiratorias, virus no identificado
+J18.9|Neumonía, no especificada
+J20.9|Bronquitis aguda, no especificada
+J30.4|Rinitis alérgica, no especificada
+J32.9|Sinusitis crónica, no especificada
+J44.9|Enfermedad pulmonar obstructiva crónica, no especificada
+J45.9|Asma, no especificada
+K02.9|Caries dental, no especificada
+K21.0|Enfermedad del reflujo gastroesofágico con esofagitis
+K21.9|Enfermedad del reflujo gastroesofágico sin esofagitis
+K29.7|Gastritis, no especificada
+K30|Dispepsia
+K52.9|Colitis y gastroenteritis no infecciosas, no especificadas
+K58.9|Síndrome del colon irritable sin diarrea
+K59.0|Constipación
+K76.0|Degeneración grasa del hígado, no clasificada en otra parte
+K80.2|Cálculo de la vesícula biliar sin colecistitis
+L20.9|Dermatitis atópica, no especificada
+L23.9|Dermatitis alérgica de contacto, de causa no especificada
+L30.9|Dermatitis, no especificada
+L40.0|Psoriasis vulgar
+L50.9|Urticaria, no especificada
+L70.0|Acné vulgar
+M10.9|Gota, no especificada
+M15.9|Poliartrosis, no especificada
+M17.9|Gonartrosis, no especificada
+M25.5|Dolor en articulación
+M54.2|Cervicalgia
+M54.4|Lumbago con ciática
+M54.5|Lumbago no especificado
+M75.1|Síndrome del manguito rotatorio
+M79.1|Mialgia
+M79.7|Fibromialgia
+M81.9|Osteoporosis no especificada, sin fractura patológica
+N20.0|Cálculo del riñón
+N30.0|Cistitis aguda
+N39.0|Infección de vías urinarias, sitio no especificado
+N40|Hiperplasia de la próstata
+N76.0|Vaginitis aguda
+N92.0|Menstruación excesiva y frecuente con ciclo regular
+N94.6|Dismenorrea, no especificada
+N95.1|Estados menopáusicos y climatéricos femeninos
+R05|Tos
+R07.4|Dolor en el pecho, no especificado
+R10.4|Otros dolores abdominales y los no especificados
+R11|Náusea y vómito
+R42|Mareo y desvanecimiento
+R50.9|Fiebre, no especificada
+R51|Cefalea
+R53|Malestar y fatiga
+S93.4|Esguinces y torceduras del tobillo
+T78.4|Alergia no especificada
+U07.1|COVID-19, virus identificado
+Z00.0|Examen médico general
+Z00.1|Control de salud de rutina del niño
+Z01.4|Examen ginecológico (general) (de rutina)
+Z30.0|Consejo y asesoramiento general sobre la anticoncepción
+Z34.9|Supervisión de embarazo normal no especificado
+Z71.3|Consulta para instrucción y vigilancia de la dieta
+Z76.0|Consulta para repetición de receta`.split('\n').map(l=>{const a=l.split('|');return{c:a[0],d:a[1],n:norm(l)}});
+const VADE=`Paracetamol 500 mg comprimidos|Paracetamol 1 g comprimidos|Paracetamol 100 mg/ml gotas|Ibuprofeno 400 mg comprimidos|Ibuprofeno 600 mg comprimidos|Ibuprofeno 100 mg/5 ml suspensión|Diclofenac 50 mg comprimidos|Diclofenac 75 mg ampollas|Naproxeno 500 mg comprimidos|Ketorolac 10 mg comprimidos|Dipirona 500 mg comprimidos|Tramadol 50 mg cápsulas|Amoxicilina 500 mg cápsulas|Amoxicilina 250 mg/5 ml suspensión|Amoxicilina + ácido clavulánico 875/125 mg comprimidos|Azitromicina 500 mg comprimidos|Claritromicina 500 mg comprimidos|Cefalexina 500 mg cápsulas|Cefixima 400 mg comprimidos|Ceftriaxona 1 g ampollas|Ciprofloxacina 500 mg comprimidos|Levofloxacina 500 mg comprimidos|Nitrofurantoína 100 mg cápsulas|Trimetoprima + sulfametoxazol 160/800 mg comprimidos|Metronidazol 500 mg comprimidos|Doxiciclina 100 mg cápsulas|Fluconazol 150 mg cápsulas|Aciclovir 400 mg comprimidos|Albendazol 400 mg comprimidos|Ivermectina 6 mg comprimidos|Loratadina 10 mg comprimidos|Cetirizina 10 mg comprimidos|Desloratadina 5 mg comprimidos|Clorfeniramina 4 mg comprimidos|Prednisona 20 mg comprimidos|Prednisona 5 mg comprimidos|Dexametasona 4 mg comprimidos|Dexametasona 8 mg ampollas|Betametasona crema 0,05 %|Hidrocortisona crema 1 %|Salbutamol 100 mcg inhalador|Budesonida 200 mcg inhalador|Salmeterol + fluticasona 25/125 mcg inhalador|Montelukast 10 mg comprimidos|Ambroxol 30 mg/5 ml jarabe|Omeprazol 20 mg cápsulas|Pantoprazol 40 mg comprimidos|Esomeprazol 40 mg comprimidos|Famotidina 40 mg comprimidos|Domperidona 10 mg comprimidos|Metoclopramida 10 mg comprimidos|Ondansetrón 8 mg comprimidos|Loperamida 2 mg comprimidos|Sales de rehidratación oral sobres|Lactulosa jarabe|Hioscina 10 mg comprimidos|Enalapril 10 mg comprimidos|Enalapril 20 mg comprimidos|Losartán 50 mg comprimidos|Losartán 100 mg comprimidos|Valsartán 160 mg comprimidos|Amlodipina 5 mg comprimidos|Amlodipina 10 mg comprimidos|Atenolol 50 mg comprimidos|Bisoprolol 5 mg comprimidos|Carvedilol 12,5 mg comprimidos|Hidroclorotiazida 25 mg comprimidos|Furosemida 40 mg comprimidos|Espironolactona 25 mg comprimidos|Ácido acetilsalicílico 100 mg comprimidos|Clopidogrel 75 mg comprimidos|Atorvastatina 20 mg comprimidos|Atorvastatina 40 mg comprimidos|Rosuvastatina 10 mg comprimidos|Metformina 500 mg comprimidos|Metformina 850 mg comprimidos|Glibenclamida 5 mg comprimidos|Glimepirida 2 mg comprimidos|Sitagliptina 100 mg comprimidos|Insulina NPH 100 UI/ml|Insulina glargina 100 UI/ml|Levotiroxina 50 mcg comprimidos|Levotiroxina 100 mcg comprimidos|Alopurinol 300 mg comprimidos|Sertralina 50 mg comprimidos|Fluoxetina 20 mg cápsulas|Escitalopram 10 mg comprimidos|Amitriptilina 25 mg comprimidos|Clonazepam 0,5 mg comprimidos|Alprazolam 0,5 mg comprimidos|Sulfato ferroso 200 mg comprimidos|Ácido fólico 5 mg comprimidos|Vitamina D3 1000 UI cápsulas|Complejo B comprimidos|Calcio + vitamina D comprimidos|Ciclobenzaprina 10 mg comprimidos|Pregabalina 75 mg cápsulas|Tamsulosina 0,4 mg cápsulas|Clotrimazol crema 1 %|Mupirocina ungüento 2 %|Permetrina loción 5 %|Tobramicina colirio 0,3 %|Ciprofloxacina gotas óticas`.split('|').map(m=>({m,n:norm(m)}));
+const HOJAS={media:['Media carta',139.7,215.9],carta:['Carta',215.9,279.4],oficio:['Oficio',215.9,330.2],a5:['A5',148,210],a4:['A4',210,297]};
+const MEDIOS={efectivo:'Efectivo',transferencia:'Transferencia',tarjeta:'Tarjeta'};
+const EST={pendiente:'Pendiente',atendido:'Atendido',ausente:'Ausente'};
+const PAGO={'':'Sin registrar',pagado:'Pagó',debe:'Debe',convenio:'Convenio / seguro'};
+
+
+
+/* ---------- estado ---------- */
+const D={pacientes:{},agenda:{},medicos:{},config:{},firmas:{},clinico:{},usuarios:{}};
+const P={emp:{},planes:{},pagos:{},users:{}};
+const S={view:'agenda',dv:'resumen',pid:null,ag:{modo:'dia',f:hoy(),q:'',mid:''},pq:'',hq:'',cajaF:hoy(),recF:addD(hoy(),1),repM:hoy().slice(0,7),t:{dx:[],rx:[]},aud:null};
+let clinicSubs=[],auth=null,fs=null,ME=null,UDOC=null,EID=null,EMP=null,ROL='',MODE='',unsubs=[],clinUnsub=null,OLD={},loaded={},DESDE='';
+const medico=()=>ROL==='admin'||ROL==='medico';
+const admin=()=>ROL==='admin';
+const cfg=()=>D.config.consultorio||{};
+const gs=n=>(MODE==='dev'?'Gs.':(cfg().moneda||'Gs.'))+' '+Number(n||0).toLocaleString('es');
+const col=c=>fs.collection('empresas/'+EID+'/'+c);
+function deep(t,s){for(const k in s){const v=s[k];if(v&&typeof v==='object'&&!Array.isArray(v))t[k]=deep(t[k]&&typeof t[k]==='object'&&!Array.isArray(t[k])?t[k]:{},v);else t[k]=v}return t}
+function werr(e){toast(e&&e.code==='permission-denied'?'Tu usuario no tiene permiso para esta acción, o la membresía no está activa.':e&&e.code==='resource-exhausted'?'Se alcanzó el límite diario gratuito de la base de datos. Probá mañana.':'No se pudo guardar. Revisá la conexión e intentá de nuevo.',1)}
+function write(c,id,data,mode){
+  if(mode==='del')delete D[c][id];else if(mode==='set')D[c][id]=clone(data);else D[c][id]=deep(D[c][id]||{},clone(data));
+  if(c==='agenda'&&id<DESDE){if(D.agenda[id])OLD[id]=D.agenda[id];else delete OLD[id]}
+  render();
+  const ref=col(c).doc(id);
+  return (mode==='del'?ref.delete():mode==='set'?ref.set(clone(data)):ref.set(clone(data),{merge:true})).catch(werr);
+}
+function delKey(c,id,k,sub){
+  if(D[c][id]&&D[c][id][k])delete D[c][id][k][sub];
+  render();
+  return col(c).doc(id).update({[k+'.'+sub]:firebase.firestore.FieldValue.delete()}).catch(werr);
+}
+function log(a,d){col('auditoria').add({t:Date.now(),uid:ME.uid,n:UDOC.nombre||ME.email,a,d:d||''}).catch(()=>{})}
+const snapObj=s=>{const o={};s.forEach(d=>{o[d.id]=d.data()});return o};
+function sub(c,q){unsubs.push(q.onSnapshot(s=>{const o=snapObj(s);D[c]=c==='agenda'?Object.assign({},OLD,o):o;render()},()=>{}))}
+function ensureMonth(m){
+  if(!m||m+'-31'>=DESDE&&m+'-01'>=DESDE||loaded[m])return;loaded[m]=1;
+  col('agenda').where('fecha','>=',m+'-01').where('fecha','<=',m+'-31').get().then(s=>{s.forEach(d=>{if(d.id<DESDE){OLD[d.id]=D.agenda[d.id]=d.data()}});render()}).catch(()=>{loaded[m]=0});
+}
+function openClin(pid){
+  if(clinUnsub){clinUnsub();clinUnsub=null}
+  if(!medico()||!pid)return;
+  clinUnsub=col('clinico').doc(pid).onSnapshot(s=>{D.clinico[pid]=s.exists?s.data():(D.clinico[pid]||{});render()},()=>{});
+}
+const turnos=f=>Object.entries((D.agenda[f]||{}).turnos||{}).map(([id,t])=>Object.assign({id},t)).filter(t=>!S.ag.mid||t.mid===S.ag.mid).sort((a,b)=>a.hora.localeCompare(b.hora));
+const pacN=t=>{const p=D.pacientes[t.pid];return p?p.nombre:(t.pn||'Paciente')};
+const medN=id=>(D.medicos[id]||{}).nombre||'';
+const lab=p=>p.nombre+(p.ci?' · '+p.ci:'');
+const pacList=()=>Object.entries(D.pacientes).map(([id,p])=>Object.assign({id},p)).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+
+/* ---------- pantallas de acceso ---------- */
+function screen(html){$('#app').hidden=true;const s=$('#scr');s.hidden=false;s.innerHTML='<div class="card">'+html+'</div>'}
+function showApp(){$('#scr').hidden=true;$('#scr').innerHTML='';$('#app').hidden=false;draw()}
+function loginScreen(msg){
+  screen(`<h1>Consultorio Médico</h1><p class="muted">Ingresá con tu correo y contraseña.</p>${msg?`<div class="banner">${esc(msg)}</div>`:''}
+  <form data-s="login" class="col"><label>Correo<input type="email" name="email" id="l_email" required autocomplete="username"></label><label>Contraseña<input type="password" name="pass" id="l_pass" required autocomplete="current-password"></label>
+  <button class="btn p">Ingresar</button><button type="button" class="btn" data-a="olvide">Olvidé mi contraseña</button></form>`);
+}
+function cambiarScreen(forzado){
+  screen(`<h1>${forzado?'Creá tu contraseña':'Cambiar contraseña'}</h1><p class="muted">${forzado?'Estás usando una contraseña temporal. Antes de continuar definí una nueva.':'Definí una nueva contraseña.'} Mínimo 8 caracteres.</p>
+  <form data-s="cambiar" class="col"><label>Nueva contraseña<input type="password" name="p1" id="c_p1" required minlength="8" autocomplete="new-password"></label><label>Repetir contraseña<input type="password" name="p2" id="c_p2" required minlength="8" autocomplete="new-password"></label>
+  <button class="btn p">Guardar contraseña</button>${forzado?'<button type="button" class="btn" data-a="salir">Salir</button>':'<button type="button" class="btn" data-a="volver">Cancelar</button>'}</form>`);
+}
+const authMsg=e=>({'auth/invalid-credential':'Correo o contraseña incorrectos.','auth/wrong-password':'Correo o contraseña incorrectos.','auth/user-not-found':'Correo o contraseña incorrectos.','auth/invalid-email':'El correo no es válido.','auth/too-many-requests':'Demasiados intentos. Esperá unos minutos.','auth/network-request-failed':'Sin conexión a internet.','auth/email-already-in-use':'Ese correo ya tiene un usuario.','auth/weak-password':'La contraseña es demasiado corta.','auth/requires-recent-login':'Por seguridad, salí y volvé a ingresar antes de cambiar la contraseña.'}[e&&e.code]||'Ocurrió un error. Intentá de nuevo.');
+function stopSubs(){unsubs.forEach(u=>u());unsubs=[];stopClinic()}
+const vigente=e=>e&&e.estado==='activa'&&(e.vence==null||e.vence.toDate()>new Date());
+async function entrar(u){
+  stopSubs();ME=u;MODE='';
+  Object.keys(D).forEach(k=>D[k]={});Object.keys(P).forEach(k=>P[k]={});S.aud=null;S.view='agenda';S.dv='resumen';S.pid=null;closeM();$('#dlgc').innerHTML='';
+  if(!u){loginScreen();return}
+  let d;try{d=await fs.doc('usuarios/'+u.uid).get()}catch(e){loginScreen('No se pudo leer tu usuario. Revisá la conexión.');return}
+  UDOC=d.exists?d.data():null;
+  const isDev=(u.email||'').toLowerCase()===DEV_EMAIL;
+  if(isDev){
+    if(!UDOC||UDOC.debeCambiar){cambiarScreen(true);return}
+    MODE='dev';ROL='dev';
+    unsubs.push(fs.collection('empresas').onSnapshot(s=>{P.emp=snapObj(s);render()},()=>{}));
+    unsubs.push(fs.collection('planes').onSnapshot(s=>{P.planes=snapObj(s);render()},()=>{}));
+    unsubs.push(fs.collection('pagos').orderBy('t','desc').limit(500).onSnapshot(s=>{P.pagos=snapObj(s);render()},()=>{}));
+    unsubs.push(fs.collection('usuarios').onSnapshot(s=>{P.users=snapObj(s);render()},()=>{}));
+    showApp();return;
+  }
+  if(!UDOC||!UDOC.empresaId){screen('<h1>Usuario sin consultorio</h1><p>Tu usuario no está asignado a ningún consultorio. Pedile acceso al administrador.</p><button class="btn" data-a="salir">Salir</button>');return}
+  if(UDOC.activo===false){screen('<h1>Usuario desactivado</h1><p>El administrador de tu consultorio desactivó este usuario.</p><button class="btn" data-a="salir">Salir</button>');return}
+  if(UDOC.debeCambiar){cambiarScreen(true);return}
+  EID=UDOC.empresaId;ROL=UDOC.rol;MODE='app';
+  let first=true;
+  unsubs.push(fs.doc('empresas/'+EID).onSnapshot(s=>{
+    EMP=s.exists?s.data():null;
+    if(!vigente(EMP)){stopClinic();screen(`<h1>Membresía ${EMP&&EMP.estado!=='activa'?'suspendida':'vencida'}</h1><p>El acceso de <b>${esc(EMP?EMP.nombre:'tu consultorio')}</b> no está activo. Tus datos están guardados; comunicate con tu proveedor para renovar.</p><button class="btn" data-a="salir">Salir</button>`);first=true;return}
+    if(first){first=false;startClinic();showApp()}else render();
+  },()=>loginScreen('No se pudo abrir el consultorio.')));
+}
+function stopClinic(){clinicSubs.forEach(u=>u());clinicSubs=[];if(clinUnsub){clinUnsub();clinUnsub=null}}
+function startClinic(){
+  stopClinic();const keep=unsubs;unsubs=[];
+  const d=new Date();DESDE=ymd(new Date(d.getFullYear(),d.getMonth()-2,1));OLD={};loaded={};
+  sub('pacientes',col('pacientes').limit(3000));
+  sub('agenda',col('agenda').where('fecha','>=',DESDE));
+  sub('medicos',col('medicos'));
+  sub('config',col('config'));
+  if(medico())sub('firmas',col('firmas'));
+  if(admin())sub('usuarios',fs.collection('usuarios').where('empresaId','==',EID));
+  clinicSubs=unsubs;unsubs=keep;
+}
+
+/* ---------- dibujo ---------- */
+let rp=false;
+function render(){if(!MODE||$('#app').hidden)return;const a=document.activeElement;if(a&&$('#main').contains(a)&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&!/date|month|checkbox|file/.test(a.type)){rp=true;return}draw()}
+document.addEventListener('focusout',()=>{if(rp)setTimeout(render,60)});
+const NAV=[['agenda','Agenda de turnos'],['pacientes','Pacientes'],['historial','Historial médico',1],['recetas','Recetas y órdenes',1],['caja','Caja'],['recordatorios','Recordatorios'],['reportes','Reportes'],['auditoria','Auditoría',2],['config','Configuración',2]];
+const DNAV=[['resumen','Resumen'],['empresas','Consultorios'],['planes','Membresías'],['ventas','Ventas']];
+const ROLN={admin:'Administrador',medico:'Médico',recepcion:'Recepción',dev:'Desarrollador'};
+const puede=n=>!n[2]||(n[2]===1?medico():admin());
+function draw(){
+  rp=false;
+  if(MODE==='dev'){
+    $('#brand').innerHTML='Panel del desarrollador<small>Consultorios y membresías</small>';
+    $('#nav').innerHTML=DNAV.map(n=>`<button data-a="dnav" data-v="${n[0]}" ${S.dv===n[0]?'aria-current="page"':''}>${n[1]}</button>`).join('');
+    $('#role').innerHTML=`<span><b>${esc(ME.email)}</b></span><button class="btn s" data-a="chpass">Cambiar contraseña</button><button class="btn s" data-a="salir">Salir</button>`;
+    $('#main').innerHTML=({resumen:dResumen,empresas:dEmpresas,planes:dPlanes,ventas:dVentas})[S.dv]();return;
+  }
+  $('#brand').innerHTML=esc(cfg().nombre||(EMP&&EMP.nombre)||'Consultorio Médico')+'<small>Gestión de pacientes y turnos</small>';
+  $('#nav').innerHTML=NAV.filter(puede).map(n=>`<button data-a="nav" data-v="${n[0]}" ${S.view===n[0]||(n[0]==='pacientes'&&S.view==='paciente')?'aria-current="page"':''}>${n[1]}</button>`).join('');
+  $('#role').innerHTML=`<span><b>${esc(UDOC.nombre||ME.email)}</b> · ${ROLN[ROL]||''}</span><button class="btn s" data-a="chpass">Cambiar contraseña</button><button class="btn s" data-a="salir">Salir</button>`;
+  if(NAV.some(n=>n[0]===S.view&&!puede(n)))S.view='agenda';
+  const V={agenda:vAgenda,pacientes:vPacientes,paciente:vPaciente,historial:vHistorial,recetas:vRecetas,caja:vCaja,recordatorios:vRecord,reportes:vReportes,auditoria:vAud,config:vConfig};
+  let av='';if(EMP&&EMP.vence){const dd=Math.ceil((EMP.vence.toDate()-new Date())/864e5);if(dd<=7)av=`<div class="banner">La membresía del consultorio vence en ${dd} día${dd===1?'':'s'}. Comunicate con tu proveedor para renovarla.</div>`}
+  $('#main').innerHTML=av+V[S.view]();
+}
+
+/* ---------- AGENDA ---------- */
+function card(f,t,mini){
+  const pg=t.pago&&t.pago.e?` <span class="pg">${t.pago.e==='pagado'?'✓ pagó':t.pago.e==='debe'?'debe':'convenio'}</span>`:'';
+  return `<div class="tc e-${t.estado}" draggable="true" data-drag="${f}|${t.id}" data-a="turno" data-f="${f}" data-id="${t.id}" tabindex="0" role="button" title="${EST[t.estado]}"><b>${t.hora}</b> ${esc(pacN(t))}${mini?'':pg+`<small>${esc([EST[t.estado],medN(t.mid),t.motivo].filter(Boolean).join(' · '))}</small>`}</div>`;
+}
+function slotOf(h){let m=parseInt(h)*60+parseInt(h.slice(3));m=Math.min(Math.max(m,420),1230);m-=m%30;return p2(m/60|0)+':'+p2(m%60)}
+const lunes=f=>{const d=pd(f);return addD(f,-((d.getDay()+6)%7))};
+function agBody(){
+  const f=S.ag.f,h=hoy();ensureMonth(f.slice(0,7));
+  if(S.ag.modo==='dia'){
+    const ts=turnos(f),by={};ts.forEach(t=>(by[slotOf(t.hora)]=by[slotOf(t.hora)]||[]).push(t));
+    let o='';for(let m=420;m<=1230;m+=30){const s=p2(m/60|0)+':'+p2(m%60);o+=`<div class="slot" data-drop data-fecha="${f}" data-hora="${s}"><span class="sh">${s}</span><div class="sc">${(by[s]||[]).map(t=>card(f,t)).join('')}</div><button class="add" data-a="nturno" data-f="${f}" data-h="${s}" aria-label="Nuevo turno a las ${s}">+</button></div>`}
+    return `<div class="panel"><h2>${esc(fdate(f,{weekday:'long',day:'numeric',month:'long',year:'numeric'}))} <span class="muted small">· ${ts.length} turno${ts.length===1?'':'s'}</span></h2><div>${o}</div></div>`;
+  }
+  if(S.ag.modo==='semana'){
+    const l=lunes(f);ensureMonth(l.slice(0,7));let o='';
+    for(let i=0;i<7;i++){const d=addD(l,i);o+=`<div class="col2 ${d===h?'hoy':''}" data-drop data-fecha="${d}"><button data-a="agdia" data-f="${d}">${esc(fdate(d,{weekday:'short',day:'numeric',month:'short'}))}</button>${turnos(d).map(t=>card(d,t)).join('')||'<span class="muted small">Sin turnos</span>'}</div>`}
+    return `<div class="scroll"><div class="week">${o}</div></div>`;
+  }
+  const a=pd(f),first=new Date(a.getFullYear(),a.getMonth(),1),n=new Date(a.getFullYear(),a.getMonth()+1,0).getDate(),off=(first.getDay()+6)%7;
+  let o=['lun','mar','mié','jue','vie','sáb','dom'].map(x=>`<div class="dow">${x}</div>`).join('')+'<div></div>'.repeat(off);
+  for(let i=1;i<=n;i++){const d=f.slice(0,8)+p2(i),ts=turnos(d);o+=`<div class="mc ${d===h?'hoy':''}" data-drop data-fecha="${d}"><button data-a="agdia" data-f="${d}" aria-label="Ver día ${i}">${i}${ts.length?` <span class="muted">· ${ts.length}</span>`:''}</button>${ts.slice(0,3).map(t=>card(d,t,1)).join('')}${ts.length>3?`<span class="muted small">+${ts.length-3} más</span>`:''}</div>`}
+  return `<div class="panel"><h2>${esc(fdate(f,{month:'long',year:'numeric'}))}</h2><div class="month">${o}</div></div>`;
+}
+function agRes(){
+  const q=norm(S.ag.q);if(q.length<2)return'';
+  const r=[];Object.keys(D.agenda).sort().reverse().forEach(f=>turnos(f).forEach(t=>{if(norm(pacN(t)).includes(q))r.push([f,t])}));
+  return `<div class="panel"><h2>Resultados para “${esc(S.ag.q)}”</h2>${r.length?`<div class="row">${r.slice(0,40).map(([f,t])=>`<div><span class="muted small">${esc(fdate(f))}</span>${card(f,t)}</div>`).join('')}</div>`:'<p class="muted">Ningún turno coincide con ese nombre en los meses cargados.</p>'}</div>`;
+}
+function vAgenda(){
+  const m=S.ag.modo;
+  return `<div class="vh"><h1>Agenda de turnos</h1><button class="btn p" data-a="nturno" data-f="${S.ag.f}">Nuevo turno</button></div>
+  <div class="row">
+    <div class="row" role="group" aria-label="Vista">${[['dia','Día'],['semana','Semana'],['mes','Mes']].map(x=>`<button class="btn" data-a="agmodo" data-m="${x[0]}" aria-pressed="${m===x[0]}">${x[1]}</button>`).join('')}</div>
+    <div class="row"><button class="btn" data-a="agmov" data-n="-1" aria-label="Anterior">‹</button><button class="btn" data-a="aghoy">Hoy</button><button class="btn" data-a="agmov" data-n="1" aria-label="Siguiente">›</button>
+    <input type="date" id="agf" value="${S.ag.f}" data-c="agf" aria-label="Ir a fecha"></div>
+    <select id="agmid" data-c="agmid" aria-label="Médico"><option value="">Todos los médicos</option>${Object.entries(D.medicos).map(([id,x])=>`<option value="${id}" ${S.ag.mid===id?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select>
+    <input class="grow" type="search" id="agq" data-i="agq" placeholder="Buscar turno por nombre del paciente" value="${esc(S.ag.q)}">
+  </div>
+  <div class="row small"><span class="pill e-pendiente">Pendiente</span><span class="pill e-atendido">Atendido</span><span class="pill e-ausente">Ausente</span><span class="muted">Arrastrá un turno a otro horario o día para moverlo.</span></div>
+  <div id="agres">${agRes()}</div><div id="agbody">${agBody()}</div>`;
+}
+function moveTurno(f0,id,f1,h1){
+  const d0=D.agenda[f0];if(!d0||!d0.turnos||!d0.turnos[id])return;
+  const t=clone(d0.turnos[id]);if(h1)t.hora=h1;
+  if(f0===f1){if(!h1||h1===d0.turnos[id].hora)return;write('agenda',f0,{turnos:{[id]:{hora:h1}}},'merge')}
+  else{delKey('agenda',f0,'turnos',id);write('agenda',f1,{fecha:f1,turnos:{[id]:t}},'merge')}
+  log('Movió turno',pacN(t)+': '+f0+' → '+f1+' '+t.hora);toast('Turno movido al '+fdate(f1)+', '+t.hora);
+}
+function turnoForm(f,id,h){
+  const t=id?D.agenda[f].turnos[id]:{hora:h||'09:00',estado:'pendiente',pago:{},mid:S.ag.mid||Object.keys(D.medicos)[0]||''};
+  const p=D.pacientes[t.pid]||(S.view==='paciente'&&!id?D.pacientes[S.pid]:null),pg=t.pago||{};
+  modal(`<h2>${id?'Turno de '+esc(pacN(t)):'Nuevo turno'}</h2>
+  <form data-s="turno" class="form"><input type="hidden" name="f0" value="${f}"><input type="hidden" name="id" value="${id||''}">
+    <label class="full">Paciente<input name="pac" id="t_pac" list="pl" required autocomplete="off" value="${p?esc(lab(p)):''}" placeholder="Escribí el nombre o la CI y elegí de la lista"></label>
+    <datalist id="pl">${pacList().map(x=>`<option value="${esc(lab(x))}">`).join('')}</datalist>
+    <label>Fecha<input type="date" name="fecha" id="t_fecha" required value="${f}"></label>
+    <label>Hora<input type="time" name="hora" id="t_hora" required step="300" value="${t.hora}"></label>
+    <label>Médico<select name="mid" id="t_mid">${Object.entries(D.medicos).map(([k,x])=>`<option value="${k}" ${t.mid===k?'selected':''}>${esc(x.nombre)}</option>`).join('')||'<option value="">Sin médicos cargados</option>'}</select></label>
+    <label>Estado<select name="estado" id="t_estado">${Object.entries(EST).map(([k,v])=>`<option value="${k}" ${t.estado===k?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label class="full">Motivo de la cita<input name="motivo" id="t_motivo" value="${esc(t.motivo||'')}"></label>
+    <h3 class="full">Pago de la consulta</h3>
+    <label>Situación<select name="pe" id="t_pe">${Object.entries(PAGO).map(([k,v])=>`<option value="${k}" ${(pg.e||'')===k?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label>Monto<input type="number" name="monto" id="t_monto" min="0" step="any" value="${pg.monto||''}"></label>
+    <label>Medio de pago<select name="medio" id="t_medio">${Object.entries(MEDIOS).map(([k,v])=>`<option value="${k}" ${pg.medio===k?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label>Convenio / seguro<input name="conv" id="t_conv" value="${esc(pg.conv||(p&&p.cob)||'')}"></label>
+    <div class="full row"><button class="btn p">Guardar turno</button>
+      ${id&&medico()?`<button type="button" class="btn" data-a="atender" data-f="${f}" data-id="${id}">Atender y registrar consulta</button>`:''}
+      ${id?`<button type="button" class="btn" data-a="pac" data-id="${t.pid}">Ver ficha</button><button type="button" class="btn d" data-a="dturno" data-f="${f}" data-id="${id}" data-confirm="Confirmar eliminación">Eliminar</button>`:''}
+      <button type="button" class="btn" data-a="close">Cancelar</button></div>
+    <p class="full small muted">¿Paciente nuevo? <button type="button" class="btn s" data-a="npac">Registrar paciente</button></p>
+  </form>`);
+}
+function findPac(v){const e=Object.entries(D.pacientes).find(([,p])=>lab(p)===v.trim());return e?e[0]:null}
+
+/* ---------- PACIENTES ---------- */
+function pacRows(){
+  const q=norm(S.pq),l=pacList().filter(p=>!q||norm(p.nombre+' '+p.ci+' '+p.tel).includes(q));
+  if(!l.length)return `<p class="muted">${Object.keys(D.pacientes).length?'Ningún paciente coincide con la búsqueda.':'Todavía no hay pacientes. Registrá el primero con “Nuevo paciente”'+(admin()?', o cargá datos de ejemplo desde Configuración.':'.')}</p>`;
+  return `<div class="scroll"><table><thead><tr><th>Nombre</th><th>CI</th><th>Teléfono</th><th>Cobertura</th><th>Registro</th></tr></thead><tbody>${l.map(p=>`<tr><td><button class="btn s" data-a="pac" data-id="${p.id}">${esc(p.nombre)}</button></td><td>${esc(p.ci)}</td><td>${esc(p.tel)}</td><td>${esc(p.cob||'Particular')}</td><td>${esc(fdate(p.reg))}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function vPacientes(){
+  return `<div class="vh"><h1>Pacientes</h1><button class="btn p" data-a="npac">Nuevo paciente</button></div>
+  <input type="search" id="pq" data-i="pq" placeholder="Buscar por nombre, CI o teléfono" value="${esc(S.pq)}">
+  <div class="panel" id="paclist">${pacRows()}</div>`;
+}
+function consHTML(pid,cid,c,first){
+  return `<details ${first?'open':''}><summary>${esc(fdate(c.fecha))} · ${esc(c.motivo||'Consulta')}${c.dx&&c.dx.length?' · '+esc(c.dx.map(d=>d.c||d.d).join(', ')):''}</summary><div>
+    <span class="muted small">${esc(medN(c.mid))}</span>
+    ${c.dx&&c.dx.length?`<div><h3>Diagnósticos</h3><div class="chips">${c.dx.map(d=>`<span class="chip">${d.c?esc(d.c)+' · ':''}${esc(d.d)}</span>`).join('')}</div></div>`:''}
+    ${c.notas?`<div><h3>Evolución y notas</h3><div style="white-space:pre-wrap">${esc(c.notas)}</div></div>`:''}
+    ${c.rx&&c.rx.length?`<div><h3>Receta</h3>${c.rx.map(r=>`<div><b>${esc(r.m)}</b>${r.i?' — '+esc(r.i):''}</div>`).join('')}</div>`:''}
+    ${c.est&&c.est.length?`<div><h3>Estudios solicitados</h3>${c.est.map(e=>`<div>${esc(e)}</div>`).join('')}</div>`:''}
+    <div class="row">${c.rx&&c.rx.length?`<button class="btn s" data-a="pdf" data-t="receta" data-pid="${pid}" data-id="${cid}">Receta en PDF</button>`:''}${c.est&&c.est.length?`<button class="btn s" data-a="pdf" data-t="orden" data-pid="${pid}" data-id="${cid}">Orden en PDF</button>`:''}
+    <button class="btn s" data-a="econs" data-pid="${pid}" data-id="${cid}">Editar</button><button class="btn s d" data-a="dcons" data-pid="${pid}" data-id="${cid}" data-confirm="Confirmar eliminación">Eliminar</button></div></div></details>`;
+}
+function timeline(pid){
+  const cl=D.clinico[pid]||{},l=Object.entries(cl.cons||{}).sort((a,b)=>(b[1].fecha+b[0]).localeCompare(a[1].fecha+a[0]));
+  if(!l.length)return '<p class="muted">Sin consultas registradas. Usá “Nueva consulta” para cargar la primera.</p>';
+  return `<div class="tl">${l.map(([cid,c],i)=>consHTML(pid,cid,c,i===0)).join('')}</div>`;
+}
+function vPaciente(){
+  const p=D.pacientes[S.pid];if(!p){S.view='pacientes';return vPacientes()}
+  const cl=D.clinico[S.pid]||{},m=medico();
+  const prox=[];Object.keys(D.agenda).sort().forEach(f=>Object.entries(D.agenda[f].turnos||{}).forEach(([id,t])=>{if(t.pid===S.pid&&f>=hoy())prox.push([f,Object.assign({id},t)])}));
+  const ar=Object.entries(cl.arch||{}).sort((a,b)=>b[1].f.localeCompare(a[1].f));
+  return `<div class="vh"><div><button class="btn s" data-a="nav" data-v="pacientes">‹ Pacientes</button><h1 style="margin-top:8px">${esc(p.nombre)}</h1><span class="muted">CI ${esc(p.ci||'—')}${p.nac?' · '+edad(p.nac):''}</span></div>
+    <div class="row"><button class="btn p" data-a="nturno" data-f="${hoy()}">Dar turno</button>${m?`<button class="btn p" data-a="ncons">Nueva consulta</button>`:''}<button class="btn" data-a="epac" data-id="${S.pid}">Editar ficha</button>${m?`<button class="btn d" data-a="dpac" data-id="${S.pid}" data-confirm="Confirmar: eliminar paciente">Eliminar</button>`:''}</div></div>
+  ${m?`<div class="alert r" role="alert"><b>Alergias</b>${esc(cl.ale||'Sin alergias registradas')}</div><div class="alert y"><b>Medicamentos habituales</b>${esc(cl.med||'Ninguno registrado')}</div>`:''}
+  <div class="panel"><h2>Datos personales</h2><div class="kv">
+    <div><span>Fecha de nacimiento</span>${esc(fdate(p.nac))}</div><div><span>Teléfono</span>${esc(p.tel||'—')}</div><div><span>Correo</span>${esc(p.mail||'—')}</div><div><span>Dirección</span>${esc(p.dir||'—')}</div>
+    <div><span>Contacto de emergencia</span>${esc(p.emN||'—')}${p.emT?' · '+esc(p.emT):''}</div><div><span>Cobertura</span>${esc(p.cob||'Particular')}</div><div><span>Fecha de registro</span>${esc(fdate(p.reg))}</div></div></div>
+  <div class="panel"><h2>Próximos turnos</h2>${prox.length?`<div class="row">${prox.map(([f,t])=>`<div><span class="muted small">${esc(fdate(f))}</span>${card(f,t)}</div>`).join('')}</div>`:'<p class="muted">Sin turnos futuros.</p>'}</div>
+  ${m?`<div class="panel"><h2>Antecedentes médicos</h2><div style="white-space:pre-wrap">${esc(cl.ant||'Sin antecedentes registrados.')}</div></div>
+  <div class="panel"><h2>Historial de consultas</h2>${timeline(S.pid)}</div>
+  <div class="panel"><h2>Estudios y documentos</h2>
+    ${ar.length?`<div class="row">${ar.map(([aid,a])=>`<div class="row" style="background:var(--sunk);border-radius:8px;padding:8px"><div><button class="btn s" data-a="vfile" data-id="${aid}">${esc(a.n)}</button><div class="muted small">${esc(fdate(a.f))}</div></div><button class="btn s d" data-a="dfile" data-id="${aid}" data-confirm="Confirmar">Quitar</button></div>`).join('')}</div>`:'<p class="muted">Sin archivos adjuntos.</p>'}
+    <label>Adjuntar estudio: fotos JPG/PNG (se comprimen solas) o PDF de hasta 700 KB<input type="file" id="upf" data-c="upfile" accept="application/pdf,image/png,image/jpeg,image/webp"></label>
+  </div>`:'<div class="panel"><p class="muted">Los antecedentes, el historial médico y los estudios solo son visibles para médicos.</p></div>'}`;
+}
+function pacForm(id){
+  const p=id?D.pacientes[id]:{},cl=id?(D.clinico[id]||{}):{};
+  const i=(n,l,v,t,x)=>`<label>${l}<input name="${n}" id="p_${n}" type="${t||'text'}" value="${esc(v||'')}" ${x||''}></label>`;
+  modal(`<h2>${id?'Editar ficha':'Nuevo paciente'}</h2><form data-s="pac" class="form"><input type="hidden" name="id" value="${id||''}">
+    ${i('nombre','Nombre y apellido',p.nombre,'text','required')}${i('ci','Cédula de identidad (CI)',p.ci,'text','inputmode="text"')}${i('nac','Fecha de nacimiento',p.nac,'date')}${i('tel','Teléfono',p.tel,'tel')}${i('mail','Correo',p.mail,'email')}${i('dir','Dirección',p.dir)}
+    ${i('emN','Contacto de emergencia: nombre',p.emN)}${i('emT','Contacto de emergencia: teléfono',p.emT,'tel')}${i('cob','Convenio / seguro médico',p.cob)}
+    ${medico()?`<label class="full">Alergias<textarea name="ale" id="p_ale">${esc(cl.ale||'')}</textarea></label><label class="full">Medicamentos habituales<textarea name="med" id="p_med">${esc(cl.med||'')}</textarea></label><label class="full">Antecedentes médicos<textarea name="ant" id="p_ant">${esc(cl.ant||'')}</textarea></label>`:''}
+    <div class="full row"><button class="btn p">Guardar</button><button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
+}
+
+/* ---------- HISTORIAL / RECETAS ---------- */
+function pickRows(q,act){
+  const n=norm(q),l=pacList().filter(p=>!n||norm(p.nombre+' '+p.ci).includes(n)).slice(0,30);
+  return l.length?l.map(p=>`<button class="btn" data-a="${act}" data-id="${p.id}">${esc(p.nombre)} <span class="muted small">${esc(p.ci||'')}</span></button>`).join(''):'<p class="muted">Ningún paciente coincide.</p>';
+}
+function vHistorial(){
+  return `<div class="vh"><h1>Historial médico</h1></div><input type="search" id="hq" data-i="hq" placeholder="Buscar paciente por nombre o CI" value="${esc(S.hq)}">
+  <div class="panel"><h2>Elegí un paciente para ver su historial</h2><div class="row" id="hlist">${pickRows(S.hq,'pac')}</div></div>`;
+}
+function vRecetas(){
+  return `<div class="vh"><h1>Recetas y órdenes</h1></div>
+  <p class="muted">Elegí el paciente. La receta y la orden se guardan en su historial y se generan en PDF con los datos del consultorio, la firma y el sello del médico.</p>
+  <input type="search" id="hq" data-i="rq" placeholder="Buscar paciente por nombre o CI" value="${esc(S.hq)}">
+  <div class="panel"><div class="row" id="hlist">${pickRows(S.hq,'rxpac')}</div></div>`;
+}
+function dxChips(){return S.t.dx.map((d,i)=>`<span class="chip">${d.c?esc(d.c)+' · ':''}${esc(d.d)}<button type="button" data-a="rdx" data-n="${i}" aria-label="Quitar">×</button></span>`).join('')}
+function rxRows(){return S.t.rx.map((r,i)=>`<div class="rx"><b>${esc(r.m)}</b><input data-rxi="${i}" id="rxi${i}" value="${esc(r.i)}" placeholder="Indicación: dosis, frecuencia, duración" aria-label="Indicación"><button type="button" class="btn s d" data-a="rrx" data-n="${i}">Quitar</button></div>`).join('')}
+function syncRx(){document.querySelectorAll('[data-rxi]').forEach(e=>{const r=S.t.rx[+e.dataset.rxi];if(r)r.i=e.value})}
+function consForm(pid,cid,turno){
+  const p=D.pacientes[pid],cl=D.clinico[pid]||{},c=cid?cl.cons[cid]:{fecha:hoy(),mid:(turno&&turno.mid)||Object.keys(D.medicos)[0]||'',motivo:(turno&&turno.motivo)||''};
+  S.t={dx:clone(c.dx||[]),rx:clone(c.rx||[])};
+  modal(`<h2>${cid?'Editar consulta':'Nueva consulta'} · ${esc(p.nombre)}</h2>
+  ${cl.ale?`<div class="alert r"><b>Alergias</b>${esc(cl.ale)}</div>`:''}${cl.med?`<div class="alert y"><b>Medicamentos habituales</b>${esc(cl.med)}</div>`:''}
+  <form data-s="cons" class="form"><input type="hidden" name="pid" value="${pid}"><input type="hidden" name="cid" value="${cid||''}"><input type="hidden" name="tf" value="${turno?turno.f:''}"><input type="hidden" name="tid" value="${turno?turno.id:''}">
+    <label>Fecha de atención<input type="date" name="fecha" id="c_fecha" required value="${c.fecha}"></label>
+    <label>Médico<select name="mid" id="c_mid">${Object.entries(D.medicos).map(([k,x])=>`<option value="${k}" ${c.mid===k?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select></label>
+    <label class="full">Motivo de consulta<input name="motivo" id="c_motivo" value="${esc(c.motivo||'')}"></label>
+    <div class="full"><label>Diagnóstico (CIE-10): buscá por código o nombre; Enter agrega texto libre<input id="dxq" data-i="dxq" autocomplete="off" placeholder="Ej.: I10, hipertensión, faringitis"></label><div class="sug" id="dxs"></div><div class="chips" id="dxc" style="margin-top:6px">${dxChips()}</div></div>
+    <label class="full">Evolución y notas<textarea name="notas" id="c_notas">${esc(c.notas||'')}</textarea></label>
+    <div class="full"><label>Receta: buscá en el vademécum; Enter agrega texto libre<input id="rxq" data-i="rxq" autocomplete="off" placeholder="Ej.: amoxicilina, losartán"></label><div class="sug" id="rxs"></div><div id="rxc" style="display:flex;flex-direction:column;gap:6px;margin-top:6px">${rxRows()}</div></div>
+    <label class="full">Estudios y análisis solicitados (uno por línea)<textarea name="est" id="c_est" placeholder="Hemograma completo&#10;Glicemia en ayunas&#10;Radiografía de tórax frente">${esc((c.est||[]).join('\n'))}</textarea></label>
+    <div class="full row"><button class="btn p">Guardar consulta</button><button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
+}
+
+/* ---------- PDF ---------- */
+function pdf(tipo,pid,cid){
+  const J=window.jspdf&&window.jspdf.jsPDF;if(!J){toast('No se pudo cargar el generador de PDF. Revisá la conexión.',1);return}
+  const p=D.pacientes[pid],c=D.clinico[pid].cons[cid],cf=cfg(),hj=HOJAS[cf.hoja]||HOJAS.media,W=hj[1],H=hj[2],m=W<160?12:20;
+  const doc=new J({unit:'mm',format:[W,H]}),md=D.medicos[c.mid]||{},fi=D.firmas[c.mid]||{};
+  let y=m+4;
+  doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text(doc.splitTextToSize(cf.nombre||(EMP&&EMP.nombre)||'Consultorio médico',W*0.55),m,y);y+=5.5;
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+  [cf.direccion,cf.telefono&&'Tel. '+cf.telefono,cf.ruc&&'RUC '+cf.ruc].filter(Boolean).forEach(l=>{doc.text(String(l),m,y);y+=4});
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text(md.nombre||'',W-m,m+4,{align:'right'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+  if(md.esp)doc.text(md.esp,W-m,m+8.5,{align:'right'});if(md.reg)doc.text('Reg. Prof. N° '+md.reg,W-m,m+12.5,{align:'right'});
+  y=Math.max(y,m+16);doc.setDrawColor(70);doc.line(m,y,W-m,y);y+=6;
+  doc.setFontSize(9.5);doc.text('Paciente: '+p.nombre,m,y);doc.text('Fecha: '+fdate(c.fecha,{day:'2-digit',month:'2-digit',year:'numeric'}),W-m,y,{align:'right'});y+=5;
+  doc.text('CI: '+(p.ci||'—')+(p.nac?'     Edad: '+edad(p.nac):''),m,y);y+=9;
+  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text(tipo==='receta'?'Rp/':'ORDEN DE ESTUDIOS',m,y);y+=7;
+  doc.setFontSize(10.5);
+  const lim=H-m-36,items=tipo==='receta'?(c.rx||[]).map(r=>[r.m,r.i]):(c.est||[]).map(e=>[e,'']);
+  items.forEach((it,i)=>{
+    const a=doc.splitTextToSize((i+1)+'. '+it[0],W-2*m),b=it[1]?doc.splitTextToSize(it[1],W-2*m-6):[];
+    if(y+a.length*5+b.length*4.6+3>lim){doc.addPage();y=m+6}
+    doc.setFont('helvetica','bold');doc.text(a,m,y);y+=a.length*5;
+    if(b.length){doc.setFont('helvetica','normal');doc.text(b,m+6,y);y+=b.length*4.6}
+    y+=3});
+  if(tipo==='orden'&&c.dx&&c.dx.length){const t=doc.splitTextToSize('Diagnóstico presuntivo: '+c.dx.map(d=>(d.c?d.c+' ':'')+d.d).join('; '),W-2*m);if(y+t.length*4.6>lim){doc.addPage();y=m+6}doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.text(t,m,y+2)}
+  const ly=H-m-12,lx=W-m-58;
+  const img=(d,x,mw,mh)=>{try{const ip=doc.getImageProperties(d),r=Math.min(mw/ip.width,mh/ip.height);doc.addImage(d,x,ly-1-ip.height*r,ip.width*r,ip.height*r)}catch(e){}};
+  if(fi.firma)img(fi.firma,lx+6,46,20);
+  if(fi.sello)img(fi.sello,Math.max(m,lx-34),30,24);
+  doc.line(lx,ly,W-m,ly);doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text(md.nombre||'Firma y sello',lx+29,ly+4,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8);if(md.reg)doc.text('Reg. Prof. N° '+md.reg,lx+29,ly+8,{align:'center'});
+  const name=(tipo==='receta'?'Receta':'Orden')+' '+p.nombre.replace(/[^\p{L}\p{N} ]/gu,'')+' '+c.fecha+'.pdf';
+  const w=window.open(doc.output('bloburl'),'_blank');if(!w)doc.save(name);
+  log('Generó '+(tipo==='receta'?'receta':'orden')+' en PDF',p.nombre);
+}
+function bajar(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+
+/* ---------- CAJA ---------- */
+function vCaja(){
+  const f=S.cajaF;ensureMonth(f.slice(0,7));const day=D.agenda[f]||{},ts=Object.entries(day.turnos||{}).map(([id,t])=>Object.assign({id},t)).sort((a,b)=>a.hora.localeCompare(b.hora));
+  const tot={efectivo:0,transferencia:0,tarjeta:0};let debe=0,nd=0,nc=0;
+  ts.forEach(t=>{const g=t.pago||{};if(g.e==='pagado')tot[g.medio||'efectivo']+=+g.monto||0;else if(g.e==='debe'){debe+=+g.monto||0;nd++}else if(g.e==='convenio')nc++});
+  const total=tot.efectivo+tot.transferencia+tot.tarjeta,ci=day.cierre;
+  return `<div class="vh"><h1>Caja</h1><input type="date" id="cajaf" data-c="cajaf" value="${f}" aria-label="Fecha de caja"></div>
+  <div class="stats"><div class="stat"><b>${gs(tot.efectivo)}</b><span>Efectivo</span></div><div class="stat"><b>${gs(tot.transferencia)}</b><span>Transferencias</span></div><div class="stat"><b>${gs(tot.tarjeta)}</b><span>Tarjetas</span></div><div class="stat"><b>${gs(total)}</b><span>Total cobrado</span></div><div class="stat"><b>${gs(debe)}</b><span>Pendiente de cobro (${nd})</span></div><div class="stat"><b>${nc}</b><span>Por convenio / seguro</span></div></div>
+  <div class="panel"><h2>Pagos del ${esc(fdate(f))}</h2>${ts.length?`<div class="scroll"><table><thead><tr><th>Hora</th><th>Paciente</th><th>Situación</th><th>Medio</th><th>Convenio</th><th class="n">Monto</th><th></th></tr></thead><tbody>${ts.map(t=>{const g=t.pago||{};return `<tr><td>${t.hora}</td><td>${esc(pacN(t))}</td><td><span class="pill ${g.e==='pagado'?'e-atendido':g.e==='debe'?'e-ausente':g.e==='convenio'?'e-pendiente':'neutral'}">${PAGO[g.e||'']}</span></td><td>${g.e==='pagado'?MEDIOS[g.medio||'efectivo']:'—'}</td><td>${esc(g.conv||'—')}</td><td class="n">${g.monto?gs(g.monto):'—'}</td><td><button class="btn s" data-a="turno" data-f="${f}" data-id="${t.id}">Registrar pago</button></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">No hay turnos en esta fecha.</p>'}</div>
+  <div class="panel"><h2>Cierre de caja</h2>${ci?`<p><span class="pill e-atendido">Caja cerrada</span> a las ${esc(new Date(ci.t).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}))}. Efectivo según sistema ${gs(ci.ef)}, contado ${gs(ci.contado)}, diferencia <b>${gs(ci.contado-ci.ef)}</b>.</p>`:''}
+    <form data-s="cierre" class="row"><label>Efectivo contado en caja<input type="number" name="contado" id="cj_contado" min="0" step="any" required value="${ci?ci.contado:''}"></label><button class="btn p" style="align-self:flex-end">${ci?'Volver a cerrar':'Cerrar caja del día'}</button></form>
+    <p class="small muted">El cierre compara el efectivo contado con ${gs(tot.efectivo)} registrado en efectivo. Transferencias y tarjetas se verifican contra el extracto.</p></div>`;
+}
+
+/* ---------- RECORDATORIOS ---------- */
+function waNum(t){let d=String(t||'').replace(/\D/g,'');if(!d)return'';const pre=String(cfg().prefijo||'595');if(d.startsWith('0'))d=pre+d.slice(1);return d}
+function recMsg(f,t){return `Hola ${pacN(t)}, le recordamos su turno en ${cfg().nombre||(EMP&&EMP.nombre)||'el consultorio'} el ${fdate(f,{weekday:'long',day:'numeric',month:'long'})} a las ${t.hora}${medN(t.mid)?' con '+medN(t.mid):''}. Por favor confirme su asistencia. Gracias.`}
+function vRecord(){
+  const f=S.recF;ensureMonth(f.slice(0,7));const ts=Object.entries((D.agenda[f]||{}).turnos||{}).map(([id,t])=>Object.assign({id},t)).filter(t=>t.estado==='pendiente').sort((a,b)=>a.hora.localeCompare(b.hora));
+  return `<div class="vh"><h1>Recordatorios</h1><input type="date" id="recf" data-c="recf" value="${f}" aria-label="Fecha de los turnos"></div>
+  <p class="muted">Turnos pendientes del ${esc(fdate(f,{weekday:'long',day:'numeric',month:'long'}))}. Cada botón abre WhatsApp o el correo con el mensaje ya escrito; el envío se confirma ahí.</p>
+  <div class="panel">${ts.length?`<div class="row"><button class="btn" data-a="copylist">Copiar lista del día</button></div><div class="scroll"><table><thead><tr><th>Hora</th><th>Paciente</th><th>Teléfono</th><th>Avisar</th><th>Enviado</th></tr></thead><tbody>${ts.map(t=>{const p=D.pacientes[t.pid]||{},n=waNum(p.tel),msg=recMsg(f,t);return `<tr><td>${t.hora}</td><td>${esc(pacN(t))}</td><td>${esc(p.tel||'—')}</td><td><div class="row">${n?`<a class="btn s p" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(msg)}" data-a="recok" data-f="${f}" data-id="${t.id}">WhatsApp</a>`:''}${p.mail?`<a class="btn s" href="mailto:${encodeURIComponent(p.mail)}?subject=${encodeURIComponent('Recordatorio de turno')}&body=${encodeURIComponent(msg)}" data-a="recok" data-f="${f}" data-id="${t.id}">Correo</a>`:''}<button class="btn s" data-a="copymsg" data-f="${f}" data-id="${t.id}">Copiar mensaje</button></div></td><td><input type="checkbox" data-c="rec" data-f="${f}" data-id="${t.id}" id="rec_${t.id}" ${t.rec?'checked':''} aria-label="Recordatorio enviado"></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">No hay turnos pendientes en esa fecha.</p>'}</div>`;
+}
+async function copy(txt){try{await navigator.clipboard.writeText(txt);toast('Copiado al portapapeles')}catch(e){modal(`<h2>Copiá el texto</h2><textarea id="cp" rows="10" readonly>${esc(txt)}</textarea><div class="row"><button class="btn" data-a="close">Cerrar</button></div>`);$('#cp').select()}}
+
+/* ---------- REPORTES ---------- */
+function vReportes(){
+  const mth=S.repM;ensureMonth(mth);const n=new Date(+mth.slice(0,4),+mth.slice(5,7),0).getDate(),per=[];let at=0,au=0,pe=0;
+  for(let i=1;i<=n;i++){const ts=Object.values((D.agenda[mth+'-'+p2(i)]||{}).turnos||{});const a=ts.filter(t=>t.estado==='atendido').length;per.push(a);at+=a;au+=ts.filter(t=>t.estado==='ausente').length;pe+=ts.filter(t=>t.estado==='pendiente').length}
+  const mx=Math.max(1,...per),nuevos=Object.values(D.pacientes).filter(p=>(p.reg||'').startsWith(mth)).length,h=hoy(),th=Object.entries((D.agenda[h]||{}).turnos||{}).map(([id,t])=>Object.assign({id},t)).sort((a,b)=>a.hora.localeCompare(b.hora));
+  const aus=at+au?Math.round(au*100/(at+au)):0;
+  return `<div class="vh"><h1>Reportes</h1><div class="row"><input type="month" id="repm" data-c="repm" value="${mth}" aria-label="Mes"><button class="btn" data-a="csv">Exportar mes en CSV</button></div></div>
+  <div class="stats"><div class="stat"><b>${at}</b><span>Pacientes atendidos en el mes</span></div><div class="stat"><b>${au}</b><span>Ausentes (${aus} %)</span></div><div class="stat"><b>${pe}</b><span>Turnos pendientes</span></div><div class="stat"><b>${nuevos}</b><span>Pacientes nuevos</span></div></div>
+  <div class="panel"><h2>Atendidos por día</h2><div style="padding-top:18px"><div class="bars" role="img" aria-label="Pacientes atendidos por día del mes">${per.map((v,i)=>`<div style="height:${v*100/mx}%" title="Día ${i+1}: ${v}">${v?`<span>${v}</span>`:''}</div>`).join('')}</div><div class="axis">${per.map((v,i)=>`<span>${(i+1)%5===0||i===0?i+1:''}</span>`).join('')}</div></div></div>
+  <div class="panel"><h2>Citas de hoy · ${esc(fdate(h))}</h2>${th.length?`<div class="scroll"><table><thead><tr><th>Hora</th><th>Paciente</th><th>Médico</th><th>Estado</th></tr></thead><tbody>${th.map(t=>`<tr><td>${t.hora}</td><td>${esc(pacN(t))}</td><td>${esc(medN(t.mid))}</td><td><span class="pill e-${t.estado}">${EST[t.estado]}</span></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Hoy no hay citas cargadas.</p>'}</div>`;
+}
+
+/* ---------- AUDITORÍA ---------- */
+async function loadAud(){
+  try{const s=await col('auditoria').orderBy('t','desc').limit(300).get();const r=[];s.forEach(d=>r.push(d.data()));S.aud=r}catch(e){S.aud=[]}
+  if(S.view==='auditoria')draw();
+}
+function vAud(){
+  if(!S.aud){loadAud();return '<div class="vh"><h1>Auditoría</h1></div><div class="panel"><p class="muted">Cargando registro…</p></div>'}
+  return `<div class="vh"><h1>Auditoría</h1><button class="btn" data-a="audref">Actualizar</button></div><p class="muted">Quién creó, modificó o eliminó datos y a qué hora. Este registro no se puede editar ni borrar desde el sistema. Últimos ${S.aud.length} movimientos.</p>
+  <div class="panel">${S.aud.length?`<div class="scroll"><table><thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead><tbody>${S.aud.map(r=>`<tr><td style="white-space:nowrap">${esc(new Date(r.t).toLocaleString('es',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}))}</td><td>${esc(r.n)}</td><td>${esc(r.a)}</td><td>${esc(r.d)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Todavía no hay movimientos registrados.</p>'}</div>`;
+}
+
+/* ---------- CONFIGURACIÓN (administrador del consultorio) ---------- */
+function vConfig(){
+  const c=cfg(),hayDemo=Object.values(D.pacientes).some(p=>p.demo),us=Object.entries(D.usuarios),max=(EMP&&EMP.maxUsuarios)||0;
+  return `<div class="vh"><h1>Configuración</h1></div>
+  <div class="panel"><h2>Membresía</h2><p>Plan <b>${esc((EMP&&EMP.planNombre)||'—')}</b> · ${EMP&&EMP.vence?'vigente hasta el '+esc(EMP.vence.toDate().toLocaleDateString('es',{day:'2-digit',month:'long',year:'numeric'})):'pago único, sin vencimiento'} · ${us.length} de ${max||'∞'} usuarios.</p></div>
+  <div class="panel"><h2>Datos del consultorio</h2><form data-s="cfg" class="form">
+    <label>Nombre del consultorio<input name="nombre" id="cf_nombre" value="${esc(c.nombre||(EMP&&EMP.nombre)||'')}" required></label><label>Dirección<input name="direccion" id="cf_direccion" value="${esc(c.direccion||'')}"></label>
+    <label>Teléfono<input name="telefono" id="cf_telefono" value="${esc(c.telefono||'')}"></label><label>RUC<input name="ruc" id="cf_ruc" value="${esc(c.ruc||'')}"></label>
+    <label>Tamaño de hoja para recetas<select name="hoja" id="cf_hoja">${Object.entries(HOJAS).map(([k,v])=>`<option value="${k}" ${(c.hoja||'media')===k?'selected':''}>${v[0]} (${v[1]} × ${v[2]} mm)</option>`).join('')}</select></label>
+    <label>Símbolo de moneda<input name="moneda" id="cf_moneda" value="${esc(c.moneda||'Gs.')}"></label><label>Prefijo de país para WhatsApp<input name="prefijo" id="cf_prefijo" inputmode="numeric" value="${esc(c.prefijo||'595')}"></label>
+    <div class="full"><button class="btn p">Guardar datos</button></div></form></div>
+  <div class="panel"><div class="vh"><h2>Usuarios del consultorio</h2><button class="btn p" data-a="nuser">Agregar usuario</button></div>
+    <div class="scroll"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th></th></tr></thead><tbody>${us.map(([id,u])=>`<tr><td>${esc(u.nombre||'')}</td><td>${esc(u.email||'')}</td><td>${ROLN[u.rol]||''}</td><td><span class="pill ${u.activo===false?'e-ausente':'e-atendido'}">${u.activo===false?'Desactivado':'Activo'}</span></td><td>${id===ME.uid?'':`<div class="row"><button class="btn s" data-a="rolu" data-id="${id}">Cambiar rol</button><button class="btn s" data-a="togu" data-id="${id}">${u.activo===false?'Activar':'Desactivar'}</button></div>`}</td></tr>`).join('')}</tbody></table></div>
+    <p class="small muted">Recepción ve agenda, contactos, caja y recordatorios. Médico además ve y edita historial, recetas y estudios. Administrador además gestiona usuarios, médicos y auditoría.</p></div>
+  <div class="panel"><div class="vh"><h2>Médicos, firma y sello</h2><button class="btn p" data-a="nmed">Agregar médico</button></div>
+    ${Object.keys(D.medicos).length?`<div class="scroll"><table><thead><tr><th>Nombre</th><th>Especialidad</th><th>Registro</th><th>Firma</th><th>Sello</th><th></th></tr></thead><tbody>${Object.entries(D.medicos).map(([id,m])=>{const f=D.firmas[id]||{};return `<tr><td>${esc(m.nombre)}</td><td>${esc(m.esp||'')}</td><td>${esc(m.reg||'')}</td><td>${f.firma?`<img class="sig" src="${f.firma}" alt="Firma">`:'—'}</td><td>${f.sello?`<img class="sig" src="${f.sello}" alt="Sello">`:'—'}</td><td><button class="btn s" data-a="emed" data-id="${id}">Editar</button></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">Agregá al menos un médico para asignar turnos y firmar recetas.</p>'}</div>
+  <div class="panel"><h2>Datos de ejemplo</h2><p class="muted">Pacientes y turnos ficticios, marcados “(ejemplo)”, para probar el sistema.</p><div class="row"><button class="btn" data-a="demo">Cargar datos de ejemplo</button>${hayDemo?'<button class="btn d" data-a="deldemo" data-confirm="Confirmar: borrar ejemplos">Borrar datos de ejemplo</button>':''}</div></div>`;
+}
+function medForm(id){
+  const m=id?D.medicos[id]:{},f=id?(D.firmas[id]||{}):{};
+  modal(`<h2>${id?'Editar médico':'Agregar médico'}</h2><form data-s="med" class="form"><input type="hidden" name="id" value="${id||''}">
+    <label>Nombre como figura en la receta<input name="nombre" id="m_nombre" required value="${esc(m.nombre||'')}" placeholder="Dra. Nombre Apellido"></label><label>Especialidad<input name="esp" id="m_esp" value="${esc(m.esp||'')}"></label><label>Registro profesional N°<input name="reg" id="m_reg" value="${esc(m.reg||'')}"></label>
+    <label class="full">Imagen de la firma (PNG o JPG, fondo blanco o transparente)<input type="file" name="firma" id="m_firma" accept="image/png,image/jpeg"></label>${f.firma?`<img class="sig" src="${f.firma}" alt="Firma actual">`:''}
+    <label class="full">Imagen del sello<input type="file" name="sello" id="m_sello" accept="image/png,image/jpeg"></label>${f.sello?`<img class="sig" src="${f.sello}" alt="Sello actual">`:''}
+    <div class="full row"><button class="btn p">Guardar</button>${id?`<button type="button" class="btn d" data-a="dmed" data-id="${id}" data-confirm="Confirmar eliminación">Eliminar</button>`:''}<button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
+}
+function userForm(eid){
+  const dev=MODE==='dev';
+  modal(`<h2>Agregar usuario</h2><form data-s="user" class="form"><input type="hidden" name="eid" value="${eid||EID}">
+    <label>Nombre<input name="nombre" id="u_nombre" required></label><label>Correo<input type="email" name="email" id="u_email" required></label>
+    <label>Rol<select name="rol" id="u_rol"><option value="recepcion">Recepción</option><option value="medico">Médico</option><option value="admin" ${dev?'selected':''}>Administrador</option></select></label>
+    <label>Contraseña temporal<input name="pass" id="u_pass" required minlength="6" value="${tmpPass()}"></label>
+    <p class="full small muted">Entregale el correo y esta contraseña temporal. El sistema le pedirá cambiarla en su primer ingreso.</p>
+    <div class="full row"><button class="btn p">Crear usuario</button><button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
+}
+async function crearUsuario(email,pass,doc){
+  const sec=firebase.apps.find(a=>a.name==='sec')||firebase.initializeApp(FB,'sec');
+  const c=await sec.auth().createUserWithEmailAndPassword(email,pass);await sec.auth().signOut();
+  await fs.doc('usuarios/'+c.user.uid).set(Object.assign({email:email.toLowerCase(),debeCambiar:true,activo:true,creado:Date.now()},doc));
+  return c.user.uid;
+}
+function imgData(file,maxW,type,maxLen){return new Promise(res=>{if(!file||!file.size)return res(null);const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{let w=Math.min(maxW,im.width),u;do{const c=document.createElement('canvas');c.width=w;c.height=Math.round(im.height*w/im.width);const x=c.getContext('2d');if(type==='image/jpeg'){x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height)}x.drawImage(im,0,0,c.width,c.height);u=c.toDataURL(type,.8);w=Math.round(w*.75)}while(u.length>maxLen&&w>60);res(u)};im.onerror=()=>res(null);im.src=r.result};r.onerror=()=>res(null);r.readAsDataURL(file)})}
+const fileData=f=>new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>res(null);r.readAsDataURL(f)});
+
+/* ---------- datos de ejemplo ---------- */
+function demo(){
+  const h=hoy(),mid='demo_med';
+  if(!cfg().nombre)write('config','consultorio',{nombre:(EMP&&EMP.nombre)||'Consultorio de ejemplo',direccion:'Av. Principal 123',telefono:'021 000 000',ruc:'',hoja:'media',moneda:'Gs.',prefijo:'595'},'set');
+  if(!Object.keys(D.medicos).length)write('medicos',mid,{nombre:'Dra. Ejemplo Médica',esp:'Clínica médica',reg:'00000',demo:true},'set');
+  const m=Object.keys(D.medicos)[0]||mid;
+  const X=[['Paciente Uno (ejemplo)','1.234.567','1985-03-12','0981 000 001','Penicilina','Losartán 50 mg cada 12 h','Hipertensión arterial desde 2019.'],['Paciente Dos (ejemplo)','2.345.678','1992-11-02','0982 000 002','','',''],['Paciente Tres (ejemplo)','3.456.789-A','1970-07-25','0983 000 003','Ibuprofeno, mariscos','Metformina 850 mg con el almuerzo','Diabetes tipo 2. Apendicectomía en 2001.'],['Paciente Cuatro (ejemplo)','4.567.890','2015-01-30','0984 000 004','','Salbutamol inhalador a demanda','Asma leve intermitente.'],['Paciente Cinco (ejemplo)','5.678.901','1958-09-09','0985 000 005','','','']];
+  const ids=X.map((x,i)=>{const id='demo_p'+(i+1);write('pacientes',id,{nombre:x[0],ci:x[1],nac:x[2],tel:x[3],mail:'',dir:'Dirección de ejemplo '+(i+1),emN:'Familiar de ejemplo',emT:'0971 000 00'+i,cob:i===2?'Seguro de ejemplo':'',reg:addD(h,-i*9),demo:true},'set');
+    const cl={ale:x[4],med:x[5],ant:x[6],cons:{}};
+    if(i===0)cl.cons.demo_c1={fecha:addD(h,-30),mid:m,motivo:'Control de presión arterial',dx:[{c:'I10',d:'Hipertensión esencial (primaria)'}],notas:'PA 135/85. Buena adherencia al tratamiento.',rx:[{m:'Losartán 50 mg comprimidos',i:'1 comprimido cada 12 horas por 30 días'}],est:['Perfil lipídico','Creatinina']};
+    if(i===2)cl.cons.demo_c2={fecha:addD(h,-12),mid:m,motivo:'Control de glicemia',dx:[{c:'E11.9',d:'Diabetes mellitus no insulinodependiente, sin mención de complicación'}],notas:'Glicemia en ayunas 128 mg/dl.',rx:[{m:'Metformina 850 mg comprimidos',i:'1 comprimido con el almuerzo'}],est:['Hemoglobina glicosilada']};
+    if(medico())write('clinico',id,cl,'set');return id});
+  const T=(f,rows)=>{const o={};rows.forEach((r,i)=>o['demo_t'+f.replace(/-/g,'')+i]={hora:r[0],pid:ids[r[1]],pn:X[r[1]][0],mid:m,motivo:r[2],estado:r[3],pago:r[4]||{},demo:true});write('agenda',f,{fecha:f,turnos:o},'merge')};
+  T(h,[['08:00',0,'Control',"atendido",{e:'pagado',monto:150000,medio:'efectivo'}],['08:30',1,'Dolor de garganta','atendido',{e:'pagado',monto:150000,medio:'transferencia'}],['09:30',2,'Control de glicemia','pendiente',{e:'convenio',conv:'Seguro de ejemplo'}],['10:00',3,'Tos','ausente'],['11:00',4,'Chequeo general','pendiente']]);
+  T(addD(h,1),[['09:00',1,'Control','pendiente'],['10:30',4,'Resultados de estudios','pendiente']]);
+  T(addD(h,-1),[['09:00',3,'Control de asma','atendido',{e:'pagado',monto:150000,medio:'tarjeta'}],['10:00',4,'Consulta','atendido',{e:'debe',monto:150000}]]);
+}
+function delDemo(){
+  Object.entries(D.pacientes).forEach(([id,p])=>{if(p.demo){write('pacientes',id,null,'del');write('clinico',id,null,'del')}});
+  Object.entries(D.agenda).forEach(([f,d])=>Object.entries(d.turnos||{}).forEach(([id,t])=>{if(t.demo)delKey('agenda',f,'turnos',id)}));
+  Object.entries(D.medicos).forEach(([id,m])=>{if(m.demo)write('medicos',id,null,'del')});
+  log('Borró datos de ejemplo');toast('Datos de ejemplo eliminados');
+}
+
+/* ================= PANEL DEL DESARROLLADOR ================= */
+const TIPO={mensual:'Mensual',anual:'Anual',unico:'Pago único (de por vida)'};
+function estEmp(e){
+  if(e.estado!=='activa')return['Suspendida','e-ausente',0];
+  if(e.vence==null)return['De por vida','e-atendido',1];
+  const dd=Math.ceil((e.vence.toDate()-new Date())/864e5),f=e.vence.toDate().toLocaleDateString('es',{day:'2-digit',month:'short',year:'numeric'});
+  if(dd<=0)return['Vencida el '+f,'e-ausente',0];
+  if(dd<=7)return['Vence en '+dd+' día'+(dd===1?'':'s'),'e-pendiente',1];
+  return['Activa hasta '+f,'e-atendido',1];
+}
+const empList=()=>Object.entries(P.emp).map(([id,e])=>Object.assign({id},e)).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'','es'));
+const pagoList=()=>Object.entries(P.pagos).map(([id,p])=>Object.assign({id},p)).sort((a,b)=>b.t-a.t);
+function dResumen(){
+  const es=empList(),act=es.filter(e=>estEmp(e)[2]).length,pg=pagoList(),m=hoy().slice(0,7);
+  const mes=pg.filter(p=>p.fecha.startsWith(m)).reduce((s,p)=>s+(+p.monto||0),0),tot=pg.reduce((s,p)=>s+(+p.monto||0),0),uni=pg.filter(p=>p.tipo==='unico').length;
+  const prox=es.filter(e=>e.estado==='activa'&&e.vence&&(e.vence.toDate()-new Date())/864e5<=10).sort((a,b)=>a.vence.toDate()-b.vence.toDate());
+  return `<div class="vh"><h1>Resumen</h1><button class="btn p" data-a="nemp">Nuevo consultorio</button></div>
+  <div class="stats"><div class="stat"><b>${act}</b><span>Consultorios activos</span></div><div class="stat"><b>${es.length-act}</b><span>Vencidos o suspendidos</span></div><div class="stat"><b>${gs(mes)}</b><span>Ventas del mes</span></div><div class="stat"><b>${gs(tot)}</b><span>Ventas acumuladas</span></div><div class="stat"><b>${uni}</b><span>Pagos únicos vendidos</span></div></div>
+  <div class="panel"><h2>Vencen en los próximos 10 días o ya vencieron</h2>${prox.length?`<div class="scroll"><table><thead><tr><th>Consultorio</th><th>Plan</th><th>Estado</th><th></th></tr></thead><tbody>${prox.map(e=>{const s=estEmp(e);return `<tr><td>${esc(e.nombre)}</td><td>${esc(e.planNombre||'—')}</td><td><span class="pill ${s[1]}">${s[0]}</span></td><td><button class="btn s p" data-a="npago" data-id="${e.id}">Registrar pago</button></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">Ningún consultorio está por vencer.</p>'}</div>
+  ${Object.keys(P.planes).length?'':'<div class="panel"><h2>Primer paso: creá las membresías</h2><p class="muted">Todavía no hay planes. Podés crear los tres sugeridos (mensual, anual y pago único) y ajustar los precios después.</p><div><button class="btn p" data-a="seedplanes">Crear membresías sugeridas</button></div></div>'}`;
+}
+function dEmpresas(){
+  const es=empList(),cnt={};Object.values(P.users).forEach(u=>{if(u.empresaId)cnt[u.empresaId]=(cnt[u.empresaId]||0)+1});
+  return `<div class="vh"><h1>Consultorios</h1><button class="btn p" data-a="nemp">Nuevo consultorio</button></div>
+  <div class="panel">${es.length?`<div class="scroll"><table><thead><tr><th>Consultorio</th><th>Contacto</th><th>Plan</th><th>Estado</th><th>Usuarios</th><th></th></tr></thead><tbody>${es.map(e=>{const s=estEmp(e);return `<tr><td><b>${esc(e.nombre)}</b><div class="muted small">${esc(e.ruc||'')}</div></td><td>${esc(e.contacto||'')}<div class="muted small">${esc(e.tel||'')}</div></td><td>${esc(e.planNombre||'—')}</td><td><span class="pill ${s[1]}">${s[0]}</span></td><td>${cnt[e.id]||0} / ${e.maxUsuarios||'∞'}</td><td><div class="row"><button class="btn s p" data-a="npago" data-id="${e.id}">Registrar pago</button><button class="btn s" data-a="eemp" data-id="${e.id}">Editar</button><button class="btn s" data-a="uemp" data-id="${e.id}">Usuarios</button><button class="btn s ${e.estado==='activa'?'d':''}" data-a="togemp" data-id="${e.id}" ${e.estado==='activa'?'data-confirm="Confirmar suspensión"':''}>${e.estado==='activa'?'Suspender':'Reactivar'}</button></div></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">Todavía no hay consultorios. Creá el primero con “Nuevo consultorio”: se genera la empresa y el usuario administrador con contraseña temporal.</p>'}</div>
+  <p class="small muted">Por privacidad médica, el desarrollador administra cuentas y membresías pero no puede leer pacientes ni historiales de ningún consultorio.</p>`;
+}
+const planOpts=sel=>Object.entries(P.planes).filter(([,p])=>p.activo!==false).map(([id,p])=>`<option value="${id}" ${sel===id?'selected':''}>${esc(p.nombre)} · ${gs(p.precio)}</option>`).join('');
+function empForm(id){
+  const e=id?P.emp[id]:{};
+  modal(`<h2>${id?'Editar consultorio':'Nuevo consultorio'}</h2><form data-s="emp" class="form"><input type="hidden" name="id" value="${id||''}">
+    <label>Nombre del consultorio<input name="nombre" id="e_nombre" required value="${esc(e.nombre||'')}"></label><label>RUC<input name="ruc" id="e_ruc" value="${esc(e.ruc||'')}"></label>
+    <label>Persona de contacto<input name="contacto" id="e_contacto" value="${esc(e.contacto||'')}"></label><label>Teléfono<input name="tel" id="e_tel" value="${esc(e.tel||'')}"></label>
+    ${id?`<label>Máximo de usuarios (0 = sin límite)<input type="number" name="max" id="e_max" min="0" value="${e.maxUsuarios||0}"></label>
+      <label>Vence el (vacío = de por vida)<input type="date" name="vence" id="e_vence" value="${e.vence?ymd(e.vence.toDate()):''}"></label>`
+    :`<label>Membresía<select name="plan" id="e_plan" required>${planOpts()}</select></label><label>Días de prueba antes del primer pago<input type="number" name="prueba" id="e_prueba" min="1" value="15" required></label>
+      <h3 class="full">Usuario administrador del consultorio</h3>
+      <label>Nombre<input name="anombre" id="e_anombre" required></label><label>Correo<input type="email" name="aemail" id="e_aemail" required></label>
+      <label>Contraseña temporal<input name="apass" id="e_apass" required minlength="6" value="${tmpPass()}"></label>
+      <p class="full small muted">El consultorio arranca en período de prueba. Al registrar el pago se activa el plan. El administrador deberá cambiar la contraseña temporal en su primer ingreso.</p>`}
+    <div class="full row"><button class="btn p">${id?'Guardar':'Crear consultorio'}</button><button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
+}
+function pagoForm(eid){
+  const e=P.emp[eid],pl=P.planes[e.planId]||Object.values(P.planes)[0]||{};
+  modal(`<h2>Registrar pago · ${esc(e.nombre)}</h2><form data-s="pago" class="form"><input type="hidden" name="eid" value="${eid}">
+    <label>Membresía<select name="plan" id="g_plan" data-c="gplan" required>${planOpts(e.planId)}</select></label>
+    <label>Monto cobrado<input type="number" name="monto" id="g_monto" min="0" step="any" required value="${pl.precio||''}"></label>
+    <label>Medio de pago<select name="medio" id="g_medio"><option value="transferencia">Transferencia</option><option value="efectivo">Efectivo</option><option value="tarjeta">Tarjeta</option></select></label>
+    <label>Fecha<input type="date" name="fecha" id="g_fecha" required value="${hoy()}"></label>
+    <label class="full">Nota o N° de comprobante<input name="nota" id="g_nota"></label>
+    <p class="full small muted">Mensual suma 1 mes y anual suma 12 meses a partir del vencimiento actual (o de hoy si ya venció). El pago único deja el consultorio activo de por vida.</p>
+    <div class="full row"><button class="btn p">Registrar pago y activar</button><button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
+}
+function empUsers(eid){
+  const us=Object.entries(P.users).filter(([,u])=>u.empresaId===eid);
+  modal(`<h2>Usuarios · ${esc(P.emp[eid].nombre)}</h2>
+  ${us.length?`<div class="scroll"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th></th></tr></thead><tbody>${us.map(([id,u])=>`<tr><td>${esc(u.nombre||'')}</td><td>${esc(u.email||'')}</td><td>${ROLN[u.rol]||''}${u.activo===false?' · desactivado':''}</td><td><button class="btn s" data-a="resetu" data-email="${esc(u.email||'')}">Enviar correo para restablecer contraseña</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Este consultorio no tiene usuarios.</p>'}
+  <div class="row"><button class="btn p" data-a="nuserdev" data-id="${eid}">Agregar administrador</button><button class="btn" data-a="close">Cerrar</button></div>`);
+}
+function dPlanes(){
+  const ps=Object.entries(P.planes);
+  return `<div class="vh"><h1>Membresías</h1><div class="row">${ps.length?'':'<button class="btn" data-a="seedplanes">Crear membresías sugeridas</button>'}<button class="btn p" data-a="nplan">Nueva membresía</button></div></div>
+  <div class="panel">${ps.length?`<div class="scroll"><table><thead><tr><th>Nombre</th><th>Tipo</th><th class="n">Precio</th><th>Usuarios incluidos</th><th>En venta</th><th></th></tr></thead><tbody>${ps.map(([id,p])=>`<tr><td><b>${esc(p.nombre)}</b></td><td>${TIPO[p.tipo]}</td><td class="n">${gs(p.precio)}</td><td>${p.maxUsuarios||'Sin límite'}</td><td><span class="pill ${p.activo===false?'neutral':'e-atendido'}">${p.activo===false?'No':'Sí'}</span></td><td><button class="btn s" data-a="eplan" data-id="${id}">Editar</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">No hay membresías. Creá las sugeridas o una nueva.</p>'}</div>`;
+}
+function planForm(id){
+  const p=id?P.planes[id]:{tipo:'mensual',maxUsuarios:3};
+  modal(`<h2>${id?'Editar membresía':'Nueva membresía'}</h2><form data-s="plan" class="form"><input type="hidden" name="id" value="${id||''}">
+    <label>Nombre<input name="nombre" id="pl_nombre" required value="${esc(p.nombre||'')}"></label>
+    <label>Tipo<select name="tipo" id="pl_tipo">${Object.entries(TIPO).map(([k,v])=>`<option value="${k}" ${p.tipo===k?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label>Precio (Gs.)<input type="number" name="precio" id="pl_precio" min="0" step="any" required value="${p.precio??''}"></label>
+    <label>Usuarios incluidos (0 = sin límite)<input type="number" name="max" id="pl_max" min="0" value="${p.maxUsuarios||0}"></label>
+    <label>En venta<select name="activo" id="pl_activo"><option value="1" ${p.activo!==false?'selected':''}>Sí</option><option value="0" ${p.activo===false?'selected':''}>No</option></select></label>
+    <div class="full row"><button class="btn p">Guardar</button><button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
+}
+function dVentas(){
+  const pg=pagoList(),by={};pg.forEach(p=>{const m=p.fecha.slice(0,7);by[m]=(by[m]||0)+(+p.monto||0)});
+  return `<div class="vh"><h1>Ventas</h1><button class="btn" data-a="csvventas">Exportar CSV</button></div>
+  <div class="stats">${Object.keys(by).sort().reverse().slice(0,6).map(m=>`<div class="stat"><b>${gs(by[m])}</b><span>${esc(pd(m+'-01').toLocaleDateString('es',{month:'long',year:'numeric'}))}</span></div>`).join('')||'<div class="stat"><b>Gs. 0</b><span>Sin ventas todavía</span></div>'}</div>
+  <div class="panel">${pg.length?`<div class="scroll"><table><thead><tr><th>Fecha</th><th>Consultorio</th><th>Membresía</th><th>Medio</th><th>Nota</th><th class="n">Monto</th><th></th></tr></thead><tbody>${pg.map(p=>`<tr><td>${esc(fdate(p.fecha))}</td><td>${esc(p.empresa)}</td><td>${esc(p.plan)}${p.tipo==='unico'?' <span class="pill e-atendido">pago único</span>':''}</td><td>${esc(MEDIOS[p.medio]||'')}</td><td>${esc(p.nota||'')}</td><td class="n">${gs(p.monto)}</td><td><button class="btn s d" data-a="dpago" data-id="${p.id}" data-confirm="Confirmar: anular">Anular</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Los pagos de membresías que registres aparecerán acá.</p>'}</div>
+  <p class="small muted">Anular un pago lo quita de las ventas pero no cambia el vencimiento del consultorio; ajustalo desde “Editar” si corresponde.</p>`;
+}
+
+/* ---------- modal ---------- */
+function modal(html){$('#dlgc').innerHTML=html;const d=$('#dlg');if(!d.open)d.showModal()}
+function closeM(){const d=$('#dlg');if(d.open)d.close()}
+
+/* ---------- acciones ---------- */
+const A={
+  nav(d){S.view=d.v;if(d.v==='auditoria')S.aud=null;draw()},
+  dnav(d){S.dv=d.v;draw()},
+  salir(){closeM();auth.signOut()},
+  chpass(){cambiarScreen(false)},
+  volver(){showApp()},
+  async olvide(){const em=$('#l_email').value.trim();if(!em){toast('Escribí tu correo arriba y volvé a tocar el botón.',1);return}try{await auth.sendPasswordResetEmail(em)}catch(e){}toast('Si el correo tiene un usuario, vas a recibir un enlace para crear una contraseña nueva.')},
+  close:closeM,
+  agmodo(d){S.ag.modo=d.m;draw()},
+  aghoy(){S.ag.f=hoy();draw()},
+  agdia(d){S.ag.f=d.f;S.ag.modo='dia';draw()},
+  agmov(d){const n=+d.n,m=S.ag.modo;if(m==='mes'){const x=pd(S.ag.f);S.ag.f=ymd(new Date(x.getFullYear(),x.getMonth()+n,1))}else S.ag.f=addD(S.ag.f,m==='semana'?7*n:n);draw()},
+  nturno(d){turnoForm(d.f||hoy(),null,d.h)},
+  turno(d){turnoForm(d.f,d.id)},
+  dturno(d){const t=D.agenda[d.f].turnos[d.id];log('Eliminó turno',pacN(t)+' · '+d.f+' '+t.hora);delKey('agenda',d.f,'turnos',d.id);closeM();toast('Turno eliminado')},
+  atender(d){const t=D.agenda[d.f].turnos[d.id];openClin(t.pid);consForm(t.pid,null,{f:d.f,id:d.id,mid:t.mid,motivo:t.motivo})},
+  pac(d){if(!D.pacientes[d.id])return;S.pid=d.id;S.view='paciente';openClin(d.id);closeM();draw();scrollTo(0,0)},
+  rxpac(d){S.pid=d.id;openClin(d.id);consForm(d.id)},
+  npac(){pacForm()},
+  epac(d){pacForm(d.id)},
+  dpac(d){const p=D.pacientes[d.id];write('pacientes',d.id,null,'del');write('clinico',d.id,null,'del');log('Eliminó paciente',p.nombre);S.view='pacientes';draw();toast('Paciente eliminado')},
+  ncons(){consForm(S.pid)},
+  econs(d){consForm(d.pid,d.id)},
+  dcons(d){delKey('clinico',d.pid,'cons',d.id);log('Eliminó consulta del historial',D.pacientes[d.pid].nombre);toast('Consulta eliminada')},
+  pdf(d){pdf(d.t,d.pid,d.id)},
+  adx(d){const x=CIE[+d.n];S.t.dx.push({c:x.c,d:x.d});$('#dxc').innerHTML=dxChips();$('#dxq').value='';$('#dxs').innerHTML=''},
+  rdx(d){S.t.dx.splice(+d.n,1);$('#dxc').innerHTML=dxChips()},
+  arx(d){syncRx();S.t.rx.push({m:VADE[+d.n].m,i:''});$('#rxc').innerHTML=rxRows();$('#rxq').value='';$('#rxs').innerHTML='';const e=$('#rxi'+(S.t.rx.length-1));if(e)e.focus()},
+  rrx(d){syncRx();S.t.rx.splice(+d.n,1);$('#rxc').innerHTML=rxRows()},
+  async vfile(d){const w=window.open('','_blank');try{const s=await col('archivos').doc(d.id).get();if(!s.exists)throw 0;const b=await (await fetch(s.data().data)).blob(),u=URL.createObjectURL(b);if(w)w.location=u;else bajar(s.data().n,b,b.type)}catch(e){if(w)w.close();toast('No se pudo abrir el archivo.',1)}},
+  dfile(d){const a=D.clinico[S.pid].arch[d.id];log('Quitó archivo',D.pacientes[S.pid].nombre+' · '+a.n);delKey('clinico',S.pid,'arch',d.id);col('archivos').doc(d.id).delete().catch(()=>{});toast('Archivo quitado')},
+  recok(d){write('agenda',d.f,{turnos:{[d.id]:{rec:true}}},'merge')},
+  copymsg(d){copy(recMsg(d.f,D.agenda[d.f].turnos[d.id]))},
+  copylist(){const f=S.recF;copy('Turnos del '+fdate(f,{weekday:'long',day:'numeric',month:'long'})+'\n'+turnos(f).filter(t=>t.estado==='pendiente').map(t=>t.hora+'  '+pacN(t)+(medN(t.mid)?'  ('+medN(t.mid)+')':'')).join('\n'))},
+  csv(){const m=S.repM,q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',r=[['Fecha','Hora','Paciente','CI','Médico','Estado','Pago','Medio','Monto','Convenio'].join(',')];
+    Object.keys(D.agenda).filter(f=>f.startsWith(m)).sort().forEach(f=>Object.values(D.agenda[f].turnos||{}).sort((a,b)=>a.hora.localeCompare(b.hora)).forEach(t=>{const g=t.pago||{},p=D.pacientes[t.pid]||{};r.push([f,t.hora,pacN(t),p.ci,medN(t.mid),EST[t.estado],PAGO[g.e||''],g.e==='pagado'?MEDIOS[g.medio||'efectivo']:'',g.monto||'',g.conv||''].map(q).join(','))}));
+    bajar('Turnos '+m+'.csv','﻿'+r.join('\r\n'),'text/csv')},
+  audref(){S.aud=null;draw()},
+  nmed(){medForm()},
+  emed(d){medForm(d.id)},
+  dmed(d){const m=D.medicos[d.id];write('medicos',d.id,null,'del');write('firmas',d.id,null,'del');log('Eliminó médico',m.nombre);closeM()},
+  nuser(){const max=(EMP&&EMP.maxUsuarios)||0;if(max&&Object.keys(D.usuarios).length>=max){toast('Tu membresía incluye hasta '+max+' usuarios. Pedí una ampliación a tu proveedor.',1);return}userForm()},
+  togu(d){const u=D.usuarios[d.id];fs.doc('usuarios/'+d.id).update({activo:u.activo===false}).catch(werr);log(u.activo===false?'Activó usuario':'Desactivó usuario',u.email)},
+  rolu(d){const u=D.usuarios[d.id],n={recepcion:'medico',medico:'admin',admin:'recepcion'}[u.rol]||'recepcion';fs.doc('usuarios/'+d.id).update({rol:n}).catch(werr);log('Cambió rol de usuario',u.email+' → '+ROLN[n]);toast(u.nombre+' ahora es '+ROLN[n])},
+  demo(){demo();log('Cargó datos de ejemplo');toast('Datos de ejemplo cargados')},
+  deldemo(){delDemo()},
+  /* desarrollador */
+  nemp(){if(!Object.keys(P.planes).length){toast('Primero creá al menos una membresía.',1);S.dv='planes';draw();return}empForm()},
+  eemp(d){empForm(d.id)},
+  uemp(d){empUsers(d.id)},
+  togemp(d){const e=P.emp[d.id];fs.doc('empresas/'+d.id).update({estado:e.estado==='activa'?'suspendida':'activa'}).catch(werr);toast(e.estado==='activa'?'Consultorio suspendido':'Consultorio reactivado')},
+  npago(d){if(!Object.keys(P.planes).length){toast('Primero creá al menos una membresía.',1);return}pagoForm(d.id)},
+  dpago(d){fs.doc('pagos/'+d.id).delete().catch(werr);toast('Pago anulado')},
+  nuserdev(d){userForm(d.id)},
+  async resetu(d){try{await auth.sendPasswordResetEmail(d.email);toast('Correo de restablecimiento enviado a '+d.email)}catch(e){toast(authMsg(e),1)}},
+  nplan(){planForm()},
+  eplan(d){planForm(d.id)},
+  seedplanes(){const b=fs.batch();[['mensual','Mensual','mensual',150000,3],['anual','Anual','anual',1500000,5],['unico','Pago único','unico',3500000,5]].forEach(x=>b.set(fs.doc('planes/'+x[0]),{nombre:x[1],tipo:x[2],precio:x[3],maxUsuarios:x[4],activo:true}));b.commit().catch(werr);toast('Membresías creadas. Ajustá los precios desde “Editar”.')},
+  csvventas(){const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';bajar('Ventas de membresias.csv','﻿'+[['Fecha','Consultorio','Membresía','Tipo','Medio','Monto','Nota'].join(',')].concat(pagoList().map(p=>[p.fecha,p.empresa,p.plan,TIPO[p.tipo],MEDIOS[p.medio],p.monto,p.nota].map(q).join(','))).join('\r\n'),'text/csv')}
+};
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]');if(!el)return;
+  if(el.dataset.confirm&&!el.dataset.armed){el.dataset.armed='1';el.dataset.txt=el.textContent;el.textContent=el.dataset.confirm;setTimeout(()=>{if(el.isConnected){delete el.dataset.armed;el.textContent=el.dataset.txt}},4000);return}
+  if(el.tagName!=='A')e.preventDefault();
+  const fn=A[el.dataset.a];if(fn)fn(el.dataset,el);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.matches('.tc'))e.target.click();
+  if(e.key==='Enter'&&e.target.id==='dxq'){e.preventDefault();const v=e.target.value.trim();if(v){S.t.dx.push({c:'',d:v});$('#dxc').innerHTML=dxChips();e.target.value='';$('#dxs').innerHTML=''}}
+  if(e.key==='Enter'&&e.target.id==='rxq'){e.preventDefault();const v=e.target.value.trim();if(v){syncRx();S.t.rx.push({m:v,i:''});$('#rxc').innerHTML=rxRows();e.target.value='';$('#rxs').innerHTML=''}}
+});
+const I={
+  agq(v){S.ag.q=v;$('#agres').innerHTML=agRes()},
+  pq(v){S.pq=v;$('#paclist').innerHTML=pacRows()},
+  hq(v){S.hq=v;$('#hlist').innerHTML=pickRows(v,'pac')},
+  rq(v){S.hq=v;$('#hlist').innerHTML=pickRows(v,'rxpac')},
+  dxq(v){const n=norm(v);$('#dxs').innerHTML=n.length<2?'':CIE.map((x,i)=>[x,i]).filter(x=>x[0].n.includes(n)).slice(0,8).map(x=>`<button type="button" data-a="adx" data-n="${x[1]}"><b>${x[0].c}</b> · ${esc(x[0].d)}</button>`).join('')},
+  rxq(v){const n=norm(v);$('#rxs').innerHTML=n.length<2?'':VADE.map((x,i)=>[x,i]).filter(x=>x[0].n.includes(n)).slice(0,8).map(x=>`<button type="button" data-a="arx" data-n="${x[1]}">${esc(x[0].m)}</button>`).join('')}
+};
+document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.i;if(k&&I[k])I[k](e.target.value)});
+const C={
+  agf(el){if(el.value){S.ag.f=el.value;draw()}},
+  agmid(el){S.ag.mid=el.value;draw()},
+  cajaf(el){if(el.value){S.cajaF=el.value;draw()}},
+  recf(el){if(el.value){S.recF=el.value;draw()}},
+  repm(el){if(el.value){S.repM=el.value;draw()}},
+  rec(el){write('agenda',el.dataset.f,{turnos:{[el.dataset.id]:{rec:el.checked}}},'merge')},
+  gplan(el){const p=P.planes[el.value];if(p)$('#g_monto').value=p.precio},
+  async upfile(el){const f=el.files[0];if(!f)return;const pid=S.pid;
+    let data;if(/^image\//.test(f.type))data=await imgData(f,1600,'image/jpeg',900000);else if(f.type==='application/pdf')data=await fileData(f);else{toast('Formato no admitido. Usá PDF, JPG o PNG.',1);el.value='';return}
+    if(!data||data.length>950000){toast('El archivo pesa demasiado (máximo 700 KB). Comprimí el PDF y volvé a intentar.',1);el.value='';return}
+    const aid=nid();toast('Subiendo '+f.name+'…');
+    try{await col('archivos').doc(aid).set({pid,n:f.name,t:f.type,data});await write('clinico',pid,{arch:{[aid]:{n:f.name,t:f.type,f:hoy()}}},'merge');log('Adjuntó archivo',D.pacientes[pid].nombre+' · '+f.name);toast('Archivo adjuntado')}catch(e){werr(e)}
+    el.value=''}
+};
+document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.c;if(k&&C[k])C[k](e.target)});
+const F={
+  async login(v,form){const b=form.querySelector('button');b.disabled=true;try{await auth.signInWithEmailAndPassword(v.email.trim(),v.pass)}catch(e){b.disabled=false;toast(authMsg(e),1)}},
+  async cambiar(v){
+    if(v.p1!==v.p2){toast('Las contraseñas no coinciden.',1);return}
+    if(v.p1.length<8||v.p1==='123456'||/^(\d)\1+$/.test(v.p1)){toast('Elegí una contraseña más segura, de al menos 8 caracteres.',1);return}
+    try{
+      await ME.updatePassword(v.p1);
+      const ref=fs.doc('usuarios/'+ME.uid);
+      if(UDOC)await ref.update({debeCambiar:false});else await ref.set({rol:'dev',nombre:'Desarrollador',email:ME.email.toLowerCase(),debeCambiar:false,activo:true,creado:Date.now()});
+      toast('Contraseña actualizada');entrar(ME);
+    }catch(e){toast(authMsg(e),1)}
+  },
+  turno(v){
+    const pid=findPac(v.pac);if(!pid){toast('Elegí un paciente de la lista, o registralo primero.',1);return}
+    const id=v.id||nid(),old=v.id?D.agenda[v.f0].turnos[v.id]:{};
+    const t=Object.assign({},old,{hora:v.hora,pid,pn:D.pacientes[pid].nombre,mid:v.mid,motivo:v.motivo.trim(),estado:v.estado,pago:{e:v.pe,monto:+v.monto||0,medio:v.medio,conv:v.conv.trim()}});
+    if(v.id&&v.f0!==v.fecha)delKey('agenda',v.f0,'turnos',id);
+    write('agenda',v.fecha,{fecha:v.fecha,turnos:{[id]:t}},'merge');
+    log(v.id?'Modificó turno':'Creó turno',t.pn+' · '+v.fecha+' '+v.hora+' · '+EST[v.estado]+(v.pe?' · '+PAGO[v.pe]:''));closeM();toast('Turno guardado');
+  },
+  pac(v){
+    const id=v.id||nid(),old=v.id?D.pacientes[v.id]:{reg:hoy()};
+    write('pacientes',id,Object.assign({},old,{nombre:v.nombre.trim(),ci:v.ci.trim(),nac:v.nac,tel:v.tel.trim(),mail:v.mail.trim(),dir:v.dir.trim(),emN:v.emN.trim(),emT:v.emT.trim(),cob:v.cob.trim()}),'set');
+    if(medico()&&'ale' in v)write('clinico',id,{ale:v.ale.trim(),med:v.med.trim(),ant:v.ant.trim()},'merge');
+    log(v.id?'Modificó ficha de paciente':'Registró paciente',v.nombre.trim());closeM();toast('Ficha guardada');
+    if(!v.id&&S.view!=='agenda'){S.pid=id;S.view='paciente';openClin(id);draw()}
+  },
+  cons(v){
+    syncRx();const cid=v.cid||nid();
+    const c={fecha:v.fecha,mid:v.mid,motivo:v.motivo.trim(),dx:S.t.dx,notas:v.notas.trim(),rx:S.t.rx.filter(r=>r.m),est:v.est.split('\n').map(s=>s.trim()).filter(Boolean)};
+    if(D.clinico[v.pid]&&D.clinico[v.pid].cons)delete D.clinico[v.pid].cons[cid];
+    write('clinico',v.pid,{cons:{[cid]:c}},'merge');
+    if(v.tid&&D.agenda[v.tf]&&D.agenda[v.tf].turnos[v.tid])write('agenda',v.tf,{turnos:{[v.tid]:{estado:'atendido'}}},'merge');
+    log(v.cid?'Modificó consulta del historial':'Registró consulta',D.pacientes[v.pid].nombre+' · '+v.fecha);
+    S.pid=v.pid;S.view='paciente';closeM();draw();toast('Consulta guardada. La receta y la orden están en el historial.');
+  },
+  cierre(v){
+    const f=S.cajaF,ts=Object.values((D.agenda[f]||{}).turnos||{});let ef=0,tr=0,tj=0;
+    ts.forEach(t=>{const g=t.pago||{};if(g.e==='pagado'){const m=+g.monto||0;if(g.medio==='transferencia')tr+=m;else if(g.medio==='tarjeta')tj+=m;else ef+=m}});
+    write('agenda',f,{fecha:f,cierre:{t:Date.now(),uid:ME.uid,ef,tr,tj,contado:+v.contado||0}},'merge');
+    log('Cerró caja',f+' · efectivo '+ef+' · contado '+(+v.contado||0));draw();toast('Caja cerrada');
+  },
+  cfg(v){write('config','consultorio',{nombre:v.nombre.trim(),direccion:v.direccion.trim(),telefono:v.telefono.trim(),ruc:v.ruc.trim(),hoja:v.hoja,moneda:v.moneda.trim()||'Gs.',prefijo:v.prefijo.replace(/\D/g,'')||'595'},'set');log('Modificó datos del consultorio');draw();toast('Datos guardados')},
+  async med(v,form){
+    const id=v.id||nid(),old=v.id?D.medicos[v.id]:{};
+    const o={nombre:v.nombre.trim(),esp:v.esp.trim(),reg:v.reg.trim()};if(old.demo)o.demo=true;
+    const fi=await imgData(form.firma.files[0],420,'image/png',110000),se=await imgData(form.sello.files[0],420,'image/png',110000);
+    write('medicos',id,o,'set');
+    if(fi||se){const f=Object.assign({},D.firmas[id]||{});if(fi)f.firma=fi;if(se)f.sello=se;write('firmas',id,f,'set')}
+    log(v.id?'Modificó médico':'Agregó médico',o.nombre);closeM();toast('Médico guardado');
+  },
+  async user(v,form){
+    const b=form.querySelector('button');b.disabled=true;
+    try{await crearUsuario(v.email.trim(),v.pass,{empresaId:v.eid,rol:v.rol,nombre:v.nombre.trim()});if(MODE==='app')log('Creó usuario',v.email.trim()+' · '+ROLN[v.rol]);closeM();toast('Usuario creado. Entregale el correo y la contraseña temporal.')}
+    catch(e){b.disabled=false;toast(e.code&&e.code.startsWith('auth/')?authMsg(e):'No se pudo crear el usuario.',1)}
+  },
+  async emp(v,form){
+    const b=form.querySelector('button');b.disabled=true;
+    try{
+      if(v.id){await fs.doc('empresas/'+v.id).update({nombre:v.nombre.trim(),ruc:v.ruc.trim(),contacto:v.contacto.trim(),tel:v.tel.trim(),maxUsuarios:+v.max||0,vence:v.vence?firebase.firestore.Timestamp.fromDate(new Date(pd(v.vence).getTime()+86399000)):null});closeM();toast('Consultorio actualizado');return}
+      const pl=P.planes[v.plan],eid=nid(),vence=new Date(Date.now()+(+v.prueba||15)*864e5);
+      await fs.doc('empresas/'+eid).set({nombre:v.nombre.trim(),ruc:v.ruc.trim(),contacto:v.contacto.trim(),tel:v.tel.trim(),planId:v.plan,planNombre:pl.nombre+' (prueba)',maxUsuarios:pl.maxUsuarios||0,estado:'activa',vence:firebase.firestore.Timestamp.fromDate(vence),creado:Date.now()});
+      try{await crearUsuario(v.aemail.trim(),v.apass,{empresaId:eid,rol:'admin',nombre:v.anombre.trim()})}catch(e){await fs.doc('empresas/'+eid).delete();throw e}
+      closeM();modal(`<h2>Consultorio creado</h2><p>Entregale estos datos al administrador de <b>${esc(v.nombre)}</b>:</p><div class="panel"><div>Correo: <b>${esc(v.aemail.trim())}</b></div><div>Contraseña temporal: <b>${esc(v.apass)}</b></div></div><p class="muted small">El sistema le pedirá cambiar la contraseña en su primer ingreso. Período de prueba hasta el ${esc(vence.toLocaleDateString('es'))}.</p><div class="row"><button class="btn p" data-a="close">Listo</button></div>`);
+    }catch(e){b.disabled=false;toast(e.code&&e.code.startsWith('auth/')?authMsg(e):'No se pudo guardar el consultorio.',1)}
+  },
+  async pago(v){
+    const e=P.emp[v.eid],pl=P.planes[v.plan];let vence=null;
+    if(pl.tipo!=='unico'){const base=e.vence&&e.vence.toDate()>new Date()&&!/prueba/.test(e.planNombre||'')?e.vence.toDate():new Date(),d=new Date(base);d.setMonth(d.getMonth()+(pl.tipo==='anual'?12:1));vence=firebase.firestore.Timestamp.fromDate(d)}
+    const b=fs.batch();
+    b.set(fs.collection('pagos').doc(),{empresaId:v.eid,empresa:e.nombre,planId:v.plan,plan:pl.nombre,tipo:pl.tipo,monto:+v.monto||0,medio:v.medio,fecha:v.fecha,nota:v.nota.trim(),t:Date.now()});
+    b.update(fs.doc('empresas/'+v.eid),{planId:v.plan,planNombre:pl.nombre,maxUsuarios:pl.maxUsuarios||0,vence,estado:'activa'});
+    try{await b.commit();closeM();toast(pl.tipo==='unico'?'Pago único registrado: consultorio activo de por vida.':'Pago registrado. Vigente hasta el '+vence.toDate().toLocaleDateString('es')+'.')}catch(x){werr(x)}
+  },
+  plan(v){const id=v.id||nid();fs.doc('planes/'+id).set({nombre:v.nombre.trim(),tipo:v.tipo,precio:+v.precio||0,maxUsuarios:+v.max||0,activo:v.activo==='1'}).catch(werr);closeM();toast('Membresía guardada')}
+};
+document.addEventListener('submit',e=>{const f=e.target,k=f.dataset.s;if(!k)return;e.preventDefault();const v={};new FormData(f).forEach((x,n)=>{if(typeof x==='string')v[n]=x});F[k](v,f)});
+
+/* arrastrar y soltar */
+document.addEventListener('dragstart',e=>{const c=e.target.closest&&e.target.closest('[data-drag]');if(c){e.dataTransfer.setData('text/plain',c.dataset.drag);e.dataTransfer.effectAllowed='move'}});
+document.addEventListener('dragover',e=>{const z=e.target.closest&&e.target.closest('[data-drop]');if(z){e.preventDefault();document.querySelectorAll('.over').forEach(x=>x!==z&&x.classList.remove('over'));z.classList.add('over')}});
+document.addEventListener('dragend',()=>document.querySelectorAll('.over').forEach(x=>x.classList.remove('over')));
+document.addEventListener('drop',e=>{const z=e.target.closest&&e.target.closest('[data-drop]');if(!z)return;e.preventDefault();z.classList.remove('over');const a=(e.dataTransfer.getData('text/plain')||'').split('|');if(a.length===2)moveTurno(a[0],a[1],z.dataset.fecha,z.dataset.hora)});
+
+/* ---------- arranque ---------- */
+(function(){
+  if(!window.firebase){screen('<h1>Sin conexión</h1><p>No se pudo cargar el sistema. Revisá tu conexión a internet y recargá la página.</p>');return}
+  if(!FB.apiKey||/^PEGAR/.test(FB.apiKey)){screen('<h1>Falta conectar la base de datos</h1><p>Abrí <b>index.html</b>, buscá <code>const FB</code> al inicio del script y pegá ahí la configuración de tu proyecto de Firebase. Los pasos están en el archivo <b>LEEME.md</b>.</p>');return}
+  firebase.initializeApp(FB);auth=firebase.auth();fs=firebase.firestore();
+  try{fs.enablePersistence({synchronizeTabs:true}).catch(()=>{})}catch(e){}
+  screen('<h1>Consultorio Médico</h1><p class="muted">Abriendo…</p>');
+  auth.onAuthStateChanged(entrar);
+})();
+</script>
+</body>
+</html>
