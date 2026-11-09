@@ -952,6 +952,7 @@ function ensureVentas(m){
   col('ventas').where('fecha','>=',m+'-01').where('fecha','<=',m+'-31').get().then(s=>{s.forEach(d=>{if(d.data().fecha<DESDE)VOLD[d.id]=D.ventas[d.id]=d.data()});render()}).catch(()=>{vloaded[m]=0});
 }
 const ventasL=()=>Object.entries(D.ventas).map(([id,v])=>Object.assign({id},v));
+const esInterno=()=>!facOk()||S.pos.f.doc==='interno';
 const facOk=()=>{const f=cfFac(),h=hoy();return !!(f.timbrado&&f.ruc&&f.razon&&f.vdesde&&f.vhasta&&f.vdesde<=h&&f.vhasta>=h)};
 const nroFac=(f,n)=>(f.est||'001')+'-'+(f.pto||'001')+'-'+String(n).padStart(7,'0');
 function vPos(){
@@ -962,7 +963,7 @@ function vPos(){
 }
 function posNueva(){
   const c=posCalc(),f=S.pos.f,a=alertasInv();
-  const banner=!facOk()?`<div class="alert y"><b>Facturación</b>${cfFac().timbrado&&cfFac().vhasta<hoy()?'El timbrado está vencido.':'Falta configurar el timbrado y los datos de facturación.'} ${admin()?'Cargalos en Ventas → Configuración.':'Pedile al administrador que los cargue.'} Sin eso no se puede facturar.</div>`:'';
+  const banner=!facOk()?`<div class="alert y"><b>Sin facturación configurada</b>${cfFac().timbrado&&cfFac().vhasta<hoy()?'El timbrado está vencido.':'Todavía no hay timbrado cargado.'} Las ventas se registran con <strong>comprobante interno</strong> (no válido como factura). ${admin()?'Para emitir facturas, cargá el timbrado en Ventas → Configuración.':''}</div>`:'';
   return `${banner}${a.frio&&c.items.some(i=>i.frio)?`<div class="alert y"><b>Cadena de frío</b>${esc(a.frio)}</div>`:''}<div class="pos">
   <div class="col">
     <div class="panel"><h2>Buscar producto</h2><input type="search" id="posq" data-i="posq" value="${esc(S.pos.q)}" placeholder="Nombre, principio activo o código de barras" aria-label="Buscar producto" autocomplete="off"><div id="posres">${posRes()}</div></div>
@@ -1011,6 +1012,7 @@ function posDatos(c){
   return `<div class="form">
   <label class="full">Cliente / Razón social<input list="pacdl" name="cli" data-c="pf" value="${fv('cli')}" placeholder="Sin nombre"></label><datalist id="pacdl">${pacList().slice(0,800).map(p=>`<option value="${esc(p.nombre)}">`).join('')}</datalist>
   <label>RUC o CI<input name="ruc" data-c="pf" value="${fv('ruc')}" placeholder="44444401-7"></label>
+  ${facOk()?`<label>Comprobante<select name="doc" data-c="pf" data-r="1"><option value="factura">Factura</option><option value="interno" ${f.doc==='interno'?'selected':''}>Comprobante interno</option></select></label>`:''}
   <label>Condición de venta<select name="cond" data-c="pf" data-r="1"><option value="contado">Contado</option><option value="credito" ${f.cond==='credito'?'selected':''}>Crédito (convenio)</option></select></label>
   ${f.cond!=='credito'?`<label>Medio de pago<select name="medio" data-c="pf">${Object.entries(MEDIOS).map(([k,v])=>`<option value="${k}" ${f.medio===k?'selected':''}>${v}</option>`).join('')}</select></label>`:'<p class="small muted" style="align-self:end">La factura a crédito queda en Cuentas por cobrar a nombre del cliente.</p>'}
   <label>Seguro médico<select name="seg" data-c="pf" data-r="1"><option value="">Sin seguro</option>${segs().map(s=>`<option value="${esc(s.n)}" ${f.seg===s.n?'selected':''}>${esc(s.n)}</option>`).join('')}</select></label>
@@ -1035,7 +1037,7 @@ function posTot(c){
   <div><span>IVA incluido</span><b>${gs(s.iva5+s.iva10)}</b></div><div class="big"><span>Total</span><b>${gs(c.total)}</b></div>
   ${c.seg&&c.pct?`<div><span>Cubre ${esc(c.seg.n)} (${c.pct} %)</span><b>${gs(c.aseg)}</b></div><div class="big"><span>${f.cond==='credito'?'A crédito del cliente':'Paga el paciente'}</span><b>${gs(c.pac)}</b></div>`:''}</div>
   ${c.seg&&c.pct?`<p class="small muted">Se emiten ${c.pac&&c.aseg?'dos facturas: una al paciente por su parte y otra a crédito a '+esc(c.seg.n)+' por la cobertura':c.aseg?'una factura a crédito a '+esc(c.seg.n):'una factura al paciente'}.</p>`:''}
-  <button class="btn p big" data-a="vender" ${c.items.length&&c.ok&&facOk()?'':'disabled'}>${f.cond==='credito'?'Facturar a crédito':'Cobrar y facturar'}</button>`;
+  <button class="btn p big" data-a="vender" ${c.items.length&&c.ok?'':'disabled'}>${esInterno()?(f.cond==='credito'?'Registrar venta a crédito':'Cobrar y emitir comprobante'):(f.cond==='credito'?'Facturar a crédito':'Cobrar y facturar')}</button>`;
 }
 function partir(items,monto,total){
   if(monto===total)return clone(items);
@@ -1044,7 +1046,7 @@ function partir(items,monto,total){
 async function vender(btn){
   const c=posCalc(),f=S.pos.f,fac=cfFac();
   if(!c.items.length)return;
-  if(!facOk()){toast('Configurá un timbrado vigente antes de facturar.',1);return}
+  const interno=esInterno();
   if(!c.ok){toast('Hay productos sin stock suficiente.',1);return}
   if(c.ctrl&&!(f.rmed&&f.rreg&&f.rpac&&f.rci&&f.rnro)){toast('Completá médico, registro profesional, paciente, CI y número de receta.',1);return}
   if(c.rx&&!f.rok){toast('Marcá que verificaste la receta médica.',1);return}
@@ -1052,18 +1054,18 @@ async function vender(btn){
   btn.disabled=true;
   const cli={n:(f.cli||'').trim()||'SIN NOMBRE',ruc:(f.ruc||'').trim()||'44444401-7'};
   const rec=c.ctrl?{med:f.rmed.trim(),reg:f.rreg.trim(),pac:f.rpac.trim(),ci:f.rci.trim(),nro:f.rnro.trim(),fec:f.rfec||hoy(),arch:true}:(c.rx?{ver:true}:null);
-  const facSnap={razon:fac.razon,ruc:fac.ruc,dir:fac.dir||'',tel:fac.tel||'',act:fac.act||'',timbrado:fac.timbrado,vdesde:fac.vdesde,vhasta:fac.vhasta,est:fac.est||'001',pto:fac.pto||'001',tipoDoc:fac.tipoDoc||'Autoimpreso',formato:fac.formato||'ticket'};
-  const g=nid(),now=Date.now(),hd=hoy(),cref=col('contadores').doc('factura');
+  const facSnap=interno?{razon:fac.razon||cfg().nombre||(EMP&&EMP.nombre)||'',ruc:fac.ruc||cfg().ruc||'',dir:fac.dir||cfg().direccion||'',tel:fac.tel||cfg().telefono||'',act:fac.act||'',formato:fac.formato||'ticket'}:{razon:fac.razon,ruc:fac.ruc,dir:fac.dir||'',tel:fac.tel||'',act:fac.act||'',timbrado:fac.timbrado,vdesde:fac.vdesde,vhasta:fac.vhasta,est:fac.est||'001',pto:fac.pto||'001',tipoDoc:fac.tipoDoc||'Autoimpreso',formato:fac.formato||'ticket'};
+  const g=nid(),now=Date.now(),hd=hoy(),cref=col('contadores').doc(interno?'interno':'factura');
   try{
     const out=await fs.runTransaction(async tx=>{
       const cs=await tx.get(cref),ps={};
       for(const pid of [...new Set(c.items.map(i=>i.pid))]){const s=await tx.get(col('productos').doc(pid));if(!s.exists)throw{code:'stock'};ps[pid]=s.data()}
       const items=[];
       for(const it of c.items){const al=alloc(ps[it.pid],it.u);if(!al)throw{code:'stock',n:it.n};al.forEach(a=>{ps[it.pid].lotes[a.lid].c-=a.c});items.push(Object.assign({},it,{lotes:al.map(a=>({lid:a.lid,l:a.l,v:a.v,c:a.c}))}))}
-      const cd=cs.exists?cs.data():{};let n=cd.timbrado===fac.timbrado&&cd.n?cd.n:(+fac.desde||1);
+      const cd=cs.exists?cs.data():{};let n=interno?(cd.n||1):(cd.timbrado===fac.timbrado&&cd.n?cd.n:(+fac.desde||1));
       const docs=[],base={fecha:hd,t:now,grupo:g,uid:ME.uid,un:UDOC.nombre||uName(UDOC),fac:facSnap,anulada:false,rec,lotesV:[...new Set(items.flatMap(i=>i.lotes.map(l=>l.l)))]};
       const mk=(parte,cliente,cond,monto,stock)=>{const its=partir(items,monto,c.total).map(i=>({pid:i.pid,n:i.n,mono:i.mono,tipo:i.tipo,modo:i.modo,cant:i.cant,u:i.u,uv:i.uv,precio:i.precio,iva:i.iva,tot:i.tot,lotes:i.lotes}));const s=ivaSum(its);
-        const v=Object.assign({},base,{num:n,nro:nroFac(facSnap,n),parte,cli:cliente,cond,medio:cond==='contado'?(f.medio||'efectivo'):'',items:its,total:monto},s,{seg:c.seg&&c.pct?{n:c.seg.n,pct:c.pct,aseg:c.aseg,pac:c.pac}:null,cobrado:cond==='contado',stock});n++;docs.push(v)};
+        const v=Object.assign({},base,{num:n,nro:interno?'NV-'+String(n).padStart(7,'0'):nroFac(facSnap,n),tipo:interno?'interno':'factura',parte,cli:cliente,cond,medio:cond==='contado'?(f.medio||'efectivo'):'',items:its,total:monto},s,{seg:c.seg&&c.pct?{n:c.seg.n,pct:c.pct,aseg:c.aseg,pac:c.pac}:null,cobrado:cond==='contado',stock});n++;docs.push(v)};
       if(c.seg&&c.pct){
         if(c.pac>0)mk('paciente',cli,f.cond==='credito'?'credito':'contado',c.pac,true);
         if(c.aseg>0)mk('aseguradora',{n:c.seg.n,ruc:c.seg.ruc||''},'credito',c.aseg,c.pac<=0);
@@ -1071,13 +1073,13 @@ async function vender(btn){
       for(const pid in ps)tx.update(col('productos').doc(pid),{lotes:ps[pid].lotes});
       const ids=docs.map(v=>{const r=col('ventas').doc();tx.set(r,v);return r.id});
       items.forEach(i=>i.lotes.forEach(l=>tx.set(col('movs').doc(),{t:now,tipo:'venta',pid:i.pid,n:i.n,l:l.l,c:-l.c,ref:docs[0].nro,uid:ME.uid})));
-      tx.set(cref,{timbrado:fac.timbrado,n});
+      tx.set(cref,interno?{n}:{timbrado:fac.timbrado,n});
       return docs.map((v,k)=>Object.assign({id:ids[k]},v));
     });
     out.forEach(v=>{D.ventas[v.id]=v});
     log('Registró venta',out.map(v=>v.nro).join(' y ')+' · '+gsn(c.total));
     S.pos.it=[];S.pos.q='';S.pos.f={cond:'contado',medio:'efectivo'};draw();
-    modal(`<h2>Venta registrada</h2><div class="kv">${out.map(v=>`<div><span>Factura ${v.parte==='aseguradora'?'a '+esc(v.cli.n):v.parte==='paciente'?'al paciente':''}</span>${esc(v.nro)} · ${gs(v.total)}</div>`).join('')}</div>
+    modal(`<h2>Venta registrada</h2><div class="kv">${out.map(v=>`<div><span>${v.tipo==='interno'?'Comprobante':'Factura'} ${v.parte==='aseguradora'?'a '+esc(v.cli.n):v.parte==='paciente'?'al paciente':''}</span>${esc(v.nro)} · ${gs(v.total)}</div>`).join('')}</div>
     <div class="row">${out.map(v=>`<button class="btn p" data-a="facpdf" data-id="${v.id}">Imprimir ${esc(v.nro)}</button>`).join('')}<button class="btn" data-a="close">Cerrar</button></div>`);
     facPdf(out[0]);
   }catch(e){btn.disabled=false;if(e&&e.code==='stock'){toast('El stock cambió mientras vendías'+(e.n?' ('+e.n+')':'')+'. Revisá las cantidades.',1);draw()}else werr(e)}
@@ -1099,8 +1101,9 @@ function facPdf(v){
   const LR=(a,b,yy,bo)=>{d.setFont('helvetica',bo?'bold':'normal');d.text(String(a),m,yy);d.text(String(b),R,yy,{align:'right'})};
   y+=C(f.razon||'',y,1,tk?10:14);
   [f.act,f.dir,f.tel&&'Tel. '+f.tel].filter(Boolean).forEach(s=>{y+=C(s,y)});
-  y+=C('RUC: '+(f.ruc||''),y,1);y+=C('Timbrado N° '+(f.timbrado||'')+' · Vigencia '+fdmy(f.vdesde)+' al '+fdmy(f.vhasta),y);y+=2;
-  y+=C('FACTURA'+(f.tipoDoc?' ('+String(f.tipoDoc).toLowerCase()+')':''),y,1,tk?10:13);y+=C('N° '+v.nro,y,1,tk?9:11);y+=1;
+  const int=v.tipo==='interno';
+  if(f.ruc)y+=C('RUC: '+f.ruc,y,1);if(!int)y+=C('Timbrado N° '+(f.timbrado||'')+' · Vigencia '+fdmy(f.vdesde)+' al '+fdmy(f.vhasta),y);y+=2;
+  y+=C(int?'COMPROBANTE INTERNO DE VENTA':'FACTURA'+(f.tipoDoc?' ('+String(f.tipoDoc).toLowerCase()+')':''),y,1,tk?10:13);y+=C('N° '+v.nro,y,1,tk?9:11);if(int)y+=C('No válido como factura',y,1);y+=1;
   d.setFontSize(fs1);d.setDrawColor(120);d.line(m,y,R,y);y+=lh+0.6;
   LR('Fecha: '+new Date(v.t).toLocaleString('es',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}),'Condición: '+(v.cond==='credito'?'Crédito':'Contado'),y);y+=lh;
   d.setFont('helvetica','normal');let t=d.splitTextToSize('Cliente: '+v.cli.n,W-2*m);d.text(t,m,y);y+=t.length*lh;d.text('RUC/CI: '+(v.cli.ruc||''),m,y);y+=lh;
@@ -1118,11 +1121,11 @@ function facPdf(v){
   d.line(m,y,R,y);y+=lh+0.6;d.setFontSize(tk?9:11);LR('TOTAL '+mon,gsn(v.total),y,1);y+=lh+1.4;d.setFontSize(fs1);
   t=d.splitTextToSize('Son '+mon+' '+letras(v.total)+'.',W-2*m);d.setFont('helvetica','normal');d.text(t,m,y);y+=t.length*lh+1;
   if(tk){LR('Gravadas 5 %',gsn(v.g5),y);y+=lh;LR('Gravadas 10 %',gsn(v.g10),y);y+=lh;LR('Exentas',gsn(v.ex),y);y+=lh}
-  d.setFont('helvetica','bold');d.text('Liquidación del IVA',m,y);y+=lh;d.setFont('helvetica','normal');LR('IVA 5 %: '+gsn(v.iva5)+'   IVA 10 %: '+gsn(v.iva10),'Total IVA: '+gsn(v.iva5+v.iva10),y);y+=lh+1;
+  if(!int){d.setFont('helvetica','bold');d.text('Liquidación del IVA',m,y);y+=lh;d.setFont('helvetica','normal');LR('IVA 5 %: '+gsn(v.iva5)+'   IVA 10 %: '+gsn(v.iva10),'Total IVA: '+gsn(v.iva5+v.iva10),y);y+=lh+1}
   if(v.seg&&v.parte==='paciente'){t=d.splitTextToSize(v.seg.n+' cubre '+v.seg.pct+' % ('+gsn(v.seg.aseg)+'), facturado aparte a la aseguradora.',W-2*m);d.text(t,m,y);y+=t.length*lh+1}
   if(v.rec&&v.rec.arch){t=d.splitTextToSize('Receta N° '+v.rec.nro+' del '+fdmy(v.rec.fec)+' · Médico: '+v.rec.med+' · Reg. Prof. '+v.rec.reg+' · Paciente '+v.rec.pac+' CI '+v.rec.ci,W-2*m);d.text(t,m,y);y+=t.length*lh+1}
   if(v.anulada){d.setTextColor(200,0,0);d.setFont('helvetica','bold');d.setFontSize(tk?14:28);d.text('ANULADA',W/2,tk?y+4:150,{align:'center'});d.setTextColor(0)}
-  d.setFont('helvetica','normal');d.setFontSize(fs1-0.5);y+=1;d.text('Original: Cliente',W/2,y,{align:'center'});
+  d.setFont('helvetica','normal');d.setFontSize(fs1-0.5);y+=1;d.text(int?'Comprobante interno · no válido como factura':'Original: Cliente',W/2,y,{align:'center'});
   return [d,y]};
   let [d,y]=build(tk?600:297);if(tk)d=build(Math.max(90,y+m+4))[0];
   const w=window.open(d.output('bloburl'),'_blank');if(!w)d.save('Factura '+v.nro+'.pdf');
@@ -1134,7 +1137,7 @@ function posDia(){
   const cred=ok.filter(v=>v.cond==='credito').reduce((s,v)=>s+v.total,0);
   return `<div class="row"><input type="date" id="posdia" data-c="posdia" value="${f}" aria-label="Fecha"></div>
   <div class="stats">${Object.entries(MEDIOS).map(([k,l])=>`<div class="stat"><b>${gs(por[k]||0)}</b><span>Contado · ${l}</span></div>`).join('')}<div class="stat"><b>${gs(cred)}</b><span>A crédito</span></div></div>
-  <div class="panel"><h2>Facturas del ${esc(fdate(f))}</h2>${vs.length?`<div class="scroll"><table><thead><tr><th>Hora</th><th>Factura</th><th>Cliente</th><th>Condición</th><th class="n">Total</th><th></th></tr></thead><tbody>${vs.map(v=>`<tr><td>${new Date(v.t).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</td><td>${esc(v.nro)}${v.anulada?' <span class="pill e-ausente">Anulada</span>':''}</td><td>${esc(v.cli.n)}<div class="small muted">${esc([v.cli.ruc,v.seg?v.seg.n+' '+v.seg.pct+' %':''].filter(Boolean).join(' · '))}</div></td><td>${v.cond==='credito'?'Crédito':'Contado · '+(MEDIOS[v.medio]||'')}</td><td class="n" style="white-space:nowrap">${gs(v.total)}</td><td><div class="row"><button class="btn s" data-a="facpdf" data-id="${v.id}">Imprimir</button>${admin()&&!v.anulada?`<button class="btn s d" data-a="anular" data-id="${v.id}" data-confirm="Confirmar anulación">Anular</button>`:''}</div></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">No hay ventas en esta fecha.</p>'}</div>`;
+  <div class="panel"><h2>Ventas del ${esc(fdate(f))}</h2>${vs.length?`<div class="scroll"><table><thead><tr><th>Hora</th><th>Comprobante</th><th>Cliente</th><th>Condición</th><th class="n">Total</th><th></th></tr></thead><tbody>${vs.map(v=>`<tr><td>${new Date(v.t).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</td><td>${esc(v.nro)}${v.tipo==='interno'?' <span class="pill neutral">Interno</span>':''}${v.anulada?' <span class="pill e-ausente">Anulada</span>':''}</td><td>${esc(v.cli.n)}<div class="small muted">${esc([v.cli.ruc,v.seg?v.seg.n+' '+v.seg.pct+' %':''].filter(Boolean).join(' · '))}</div></td><td>${v.cond==='credito'?'Crédito':'Contado · '+(MEDIOS[v.medio]||'')}</td><td class="n" style="white-space:nowrap">${gs(v.total)}</td><td><div class="row"><button class="btn s" data-a="facpdf" data-id="${v.id}">Imprimir</button>${admin()&&!v.anulada?`<button class="btn s d" data-a="anular" data-id="${v.id}" data-confirm="Confirmar anulación">Anular</button>`:''}</div></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">No hay ventas en esta fecha.</p>'}</div>`;
 }
 async function anular(id){
   const v=D.ventas[id];if(!v)return;
