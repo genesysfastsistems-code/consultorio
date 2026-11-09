@@ -47,7 +47,7 @@ nav button:focus-visible{box-shadow:var(--ring)}
 .who{display:flex;gap:10px;align-items:center;min-width:0}
 .av{width:36px;height:36px;border-radius:50%;background:var(--side-act);color:var(--side-ink);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
 .who div{min-width:0}.who b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.who small{color:var(--side-muted);font-size:11.5px}
+.who small{color:var(--side-muted);font-size:11.5px;overflow-wrap:anywhere}
 .role .acts{display:flex;gap:6px}
 .role .acts button{all:unset;cursor:pointer;flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 8px;border-radius:9px;font-size:12px;font-weight:600;color:var(--side-muted);border:1px solid var(--side-line)}
 .role .acts button:hover{background:var(--side-act);color:var(--side-ink)}
@@ -72,7 +72,6 @@ input,select,textarea{background:var(--surface);border:1px solid var(--line);bor
 input:hover,select:hover,textarea:hover{border-color:var(--muted)}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:var(--ring)}
 input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);padding:0}
-input[type=search]{background-image:none;padding-left:12px}
 textarea{width:100%;min-height:70px;resize:vertical}
 label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--muted)}
 label>input,label>select{width:100%;color:var(--ink);font-weight:500;font-size:14px}
@@ -96,7 +95,6 @@ td.n,th.n{text-align:right}
 .e-ausente{background:var(--bad-bg);color:var(--bad-ink)}
 .neutral{background:var(--sunk);color:var(--muted)}
 .banner{border-radius:12px;padding:11px 14px;background:var(--warn-bg);color:var(--warn-ink);font-weight:600}
-/* agenda */
 .slot{display:grid;grid-template-columns:54px minmax(0,1fr) 32px;gap:10px;align-items:start;border-top:1px dashed var(--line);padding:5px 0;min-height:42px}
 .slot.over,.col2.over,.mc.over{background:var(--accent-soft);border-radius:10px}
 .sh{color:var(--muted);font-weight:700;font-size:12.5px;padding-top:8px}
@@ -115,7 +113,6 @@ td.n,th.n{text-align:right}
 .mc{background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:6px;min-height:92px;display:flex;flex-direction:column;gap:3px;min-width:0}
 .mc .tc{padding:1px 6px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left-width:3px;border-radius:6px}
 .dow{font-size:11px;font-weight:700;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.06em}
-/* paciente */
 .alert{border-radius:14px;padding:13px 16px;font-weight:600;display:flex;flex-direction:column;gap:2px}
 .alert b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
 .alert.r{background:var(--bad-bg);color:var(--bad-ink);border:2px solid var(--bad-ink)}
@@ -140,6 +137,9 @@ details>div{display:flex;flex-direction:column;gap:10px;padding-top:12px}
 .bars div:hover{opacity:1}
 .bars div span{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);font-weight:700}
 .axis{display:flex;gap:4px;padding-top:4px}.axis span{flex:1;text-align:center;font-size:10px;color:var(--muted)}
+.hb{height:8px;background:var(--sunk);border-radius:9px;overflow:hidden;min-width:70px}.hb i{display:block;height:100%;background:var(--accent);border-radius:9px}
+.rbt{display:flex;gap:10px;align-items:flex-start}.dot{width:10px;height:10px;margin-top:6px;border-radius:50%;flex:none;background:var(--muted)}.dot.on{background:#1f9d5c;box-shadow:0 0 0 4px rgba(31,157,92,.18)}.dot.off{background:#d14b3a}
+.vars code{background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column-reverse;gap:4px}
 .stat b{display:block;font-size:22px;font-weight:800;letter-spacing:-.02em;overflow-wrap:anywhere}
@@ -156,7 +156,6 @@ img.sig{max-height:56px;background:#fff;border:1px solid var(--line);border-radi
 .card .logo{width:48px;height:48px;border-radius:14px}.card .logo svg.i{width:26px;height:26px}
 .card .btn{justify-content:center;padding:11px 14px}
 code{background:var(--sunk);padding:1px 6px;border-radius:5px}
-.empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:26px 10px;text-align:center;color:var(--muted)}
 @media (max-width:820px){
   .app{grid-template-columns:minmax(0,1fr)}
   .side{position:static;height:auto;padding:12px 16px;gap:10px}
@@ -190,7 +189,7 @@ code{background:var(--sunk);padding:1px 6px;border-radius:5px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-/* ===== 1. PEGÁ ACÁ LA CONFIGURACIÓN DE TU PROYECTO DE FIREBASE (ver LEEME.md) ===== */
+/* ===== 1. Configuración del proyecto de Firebase ===== */
 const FB = {
   apiKey: "AIzaSyBGOnOKEJhKrOL43ldbRrU8130J31MnXp0",
   authDomain: "consultorio-medico-d325f.firebaseapp.com",
@@ -490,7 +489,7 @@ function draw(){
 /* ---------- AGENDA ---------- */
 function card(f,t,mini){
   const pg=t.pago&&t.pago.e?` <span class="pg">${t.pago.e==='pagado'?'✓ pagó':t.pago.e==='debe'?'debe':'convenio'}</span>`:'';
-  return `<div class="tc e-${t.estado}" draggable="true" data-drag="${f}|${t.id}" data-a="turno" data-f="${f}" data-id="${t.id}" tabindex="0" role="button" title="${EST[t.estado]}"><b>${t.hora}</b> ${esc(pacN(t))}${mini?'':pg+`<small>${esc([EST[t.estado],medN(t.mid),t.motivo].filter(Boolean).join(' · '))}</small>`}</div>`;
+  return `<div class="tc e-${t.estado}" draggable="true" data-drag="${f}|${t.id}" data-a="turno" data-f="${f}" data-id="${t.id}" tabindex="0" role="button" title="${EST[t.estado]}"><b>${t.hora}</b> ${esc(pacN(t))}${t.conf===true?' ✓':t.conf===false?' ✕':''}${mini?'':pg+`<small>${esc([EST[t.estado],t.conf===true?'Confirmó':t.conf===false?'Avisó que no viene':'',medN(t.mid),t.motivo].filter(Boolean).join(' · '))}</small>`}</div>`;
 }
 function slotOf(h){let m=parseInt(h)*60+parseInt(h.slice(3));m=Math.min(Math.max(m,420),1230);m-=m%30;return p2(m/60|0)+':'+p2(m%60)}
 const lunes=f=>{const d=pd(f);return addD(f,-((d.getDay()+6)%7))};
@@ -531,8 +530,8 @@ function vAgenda(){
 }
 function moveTurno(f0,id,f1,h1){
   const d0=D.agenda[f0];if(!d0||!d0.turnos||!d0.turnos[id])return;
-  const t=clone(d0.turnos[id]);if(h1)t.hora=h1;
-  if(f0===f1){if(!h1||h1===d0.turnos[id].hora)return;write('agenda',f0,{turnos:{[id]:{hora:h1}}},'merge')}
+  const t=clone(d0.turnos[id]);if(h1)t.hora=h1;Object.assign(t,RESET);
+  if(f0===f1){if(!h1||h1===d0.turnos[id].hora)return;write('agenda',f0,{turnos:{[id]:Object.assign({hora:h1},RESET)}},'merge')}
   else{delKey('agenda',f0,'turnos',id);write('agenda',f1,{fecha:f1,turnos:{[id]:t}},'merge')}
   log('Movió turno',pacN(t)+': '+f0+' → '+f1+' '+t.hora);toast('Turno movido al '+fdate(f1)+', '+t.hora);
 }
@@ -703,13 +702,48 @@ function vCaja(){
 }
 
 /* ---------- RECORDATORIOS ---------- */
-function waNum(t){let d=String(t||'').replace(/\D/g,'');if(!d)return'';const pre=String(cfg().prefijo||'595');if(d.startsWith('0'))d=pre+d.slice(1);return d}
-function recMsg(f,t){return `Hola ${pacN(t)}, le recordamos su turno en ${cfg().nombre||(EMP&&EMP.nombre)||'el consultorio'} el ${fdate(f,{weekday:'long',day:'numeric',month:'long'})} a las ${t.hora}${medN(t.mid)?' con '+medN(t.mid):''}. Por favor confirme su asistencia. Gracias.`}
+function waNum(t){let d=String(t||'').replace(/\D/g,'');if(!d)return'';const pre=String(cfg().prefijo||'595');if(d.startsWith('0'))d=pre+d.slice(1);else if(d.length<=9)d=pre+d;return d}
+const RESET={rec:false,recAuto:null,recErr:null,conf:null};
+const REC_TPL='Hola {paciente}, le recordamos su turno en {consultorio} el {fecha} a las {hora} con {medico}. Responda SI para confirmar o NO si no puede asistir. Gracias.';
+const cfgR=()=>D.config.recordatorios||{};
+function recMsg(f,t){
+  const m=medN(t.mid),v={paciente:pacN(t),consultorio:cfg().nombre||(EMP&&EMP.nombre)||'el consultorio',fecha:fdate(f,{weekday:'long',day:'numeric',month:'long'}),hora:t.hora,medico:m};
+  let s=cfgR().plantilla||REC_TPL;if(!m)s=s.replace(/ con \{medico\}/g,'');
+  return s.replace(/\{(paciente|consultorio|fecha|hora|medico)\}/g,(_,k)=>v[k]);
+}
+const hhmm=ms=>new Date(ms).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+function hace(ms){const m=Math.round((Date.now()-ms)/60000);return m<60?m+' min':m<1440?Math.round(m/60)+' h':Math.round(m/1440)+' días'}
+function robotBox(){
+  const r=D.config.robot,c=cfgR(),on=r&&r.visto&&Date.now()-r.visto<25*60000&&r.estado==='conectado';
+  const est=!r?'<span class="dot"></span><span><b>Robot no instalado.</b> Los recordatorios se envían a mano con los botones de abajo.</span>'
+    :on?`<span class="dot on"></span><span><b>Robot conectado</b>${r.numero?' · WhatsApp '+esc(r.numero):''} · última señal hace ${hace(r.visto)}${r.fechaHoy===hoy()?' · '+(r.enviadosHoy||0)+' enviados hoy':''}</span>`
+    :`<span class="dot off"></span><span><b>Robot desconectado</b> · ${r.estado==='qr'?'esperando que se escanee el código QR':'última señal hace '+hace(r.visto||0)}. Revisá que la PC del robot esté encendida.</span>`;
+  const ro=admin()?'':'disabled';
+  return `<div class="panel"><h2>Envío automático por WhatsApp</h2><div class="rbt">${est}</div>
+  <form data-s="recfg" class="form">
+    <label>Envío automático<select name="activo" id="rc_activo" ${ro}><option value="1" ${c.activo?'selected':''}>Activado</option><option value="0" ${c.activo?'':'selected'}>Desactivado</option></select></label>
+    <label>Avisar<select name="anticip" id="rc_anticip" ${ro}>${[[1,'El día anterior al turno'],[2,'Dos días antes'],[0,'El mismo día del turno']].map(([k,l])=>`<option value="${k}" ${(c.anticip??1)==k?'selected':''}>${l}</option>`).join('')}</select></label>
+    <label>Enviar desde las<input type="time" name="desde" id="rc_desde" value="${esc(c.desde||'17:00')}" ${ro}></label>
+    <label>Hasta las<input type="time" name="hasta" id="rc_hasta" value="${esc(c.hasta||'20:00')}" ${ro}></label>
+    <label class="full">Mensaje<textarea name="plantilla" id="rc_plantilla" rows="3" ${ro}>${esc(c.plantilla||REC_TPL)}</textarea></label>
+    <p class="full small muted vars">Se reemplazan solos: <code>{paciente}</code> <code>{fecha}</code> <code>{hora}</code> <code>{medico}</code> <code>{consultorio}</code>. Si el paciente responde SI o NO, el turno queda marcado como confirmado o “no viene”.</p>
+    ${admin()?'<div class="full row"><button class="btn p">Guardar</button></div>':'<p class="full small muted">Solo el administrador cambia esta configuración.</p>'}
+  </form></div>`;
+}
+function recEstado(t){
+  if(t.conf===true)return '<span class="pill e-atendido">Confirmó</span>';
+  if(t.conf===false)return '<span class="pill e-ausente">No viene</span>';
+  if(t.recAuto&&t.rec)return `<span class="pill neutral">Robot ${hhmm(t.recAuto)}</span>`;
+  if(t.rec)return '<span class="pill neutral">Enviado</span>';
+  if(t.recErr)return `<span class="pill e-ausente" title="${esc(t.recErr)}">No enviado</span><div class="small muted">${esc(t.recErr)}</div>`;
+  return '<span class="muted">—</span>';
+}
 function vRecord(){
   const f=S.recF;ensureMonth(f.slice(0,7));const ts=Object.entries((D.agenda[f]||{}).turnos||{}).map(([id,t])=>Object.assign({id},t)).filter(t=>t.estado==='pendiente').sort((a,b)=>a.hora.localeCompare(b.hora));
   return `<div class="vh"><h1>Recordatorios</h1><input type="date" id="recf" data-c="recf" value="${f}" aria-label="Fecha de los turnos"></div>
-  <p class="muted">Turnos pendientes del ${esc(fdate(f,{weekday:'long',day:'numeric',month:'long'}))}. Cada botón abre WhatsApp o el correo con el mensaje ya escrito; el envío se confirma ahí.</p>
-  <div class="panel">${ts.length?`<div class="row"><button class="btn" data-a="copylist">Copiar lista del día</button></div><div class="scroll"><table><thead><tr><th>Hora</th><th>Paciente</th><th>Teléfono</th><th>Avisar</th><th>Enviado</th></tr></thead><tbody>${ts.map(t=>{const p=D.pacientes[t.pid]||{},n=waNum(p.tel),msg=recMsg(f,t);return `<tr><td>${t.hora}</td><td>${esc(pacN(t))}</td><td>${esc(p.tel||'—')}</td><td><div class="row">${n?`<a class="btn s p" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(msg)}" data-a="recok" data-f="${f}" data-id="${t.id}">WhatsApp</a>`:''}${p.mail?`<a class="btn s" href="mailto:${encodeURIComponent(p.mail)}?subject=${encodeURIComponent('Recordatorio de turno')}&body=${encodeURIComponent(msg)}" data-a="recok" data-f="${f}" data-id="${t.id}">Correo</a>`:''}<button class="btn s" data-a="copymsg" data-f="${f}" data-id="${t.id}">Copiar mensaje</button></div></td><td><input type="checkbox" data-c="rec" data-f="${f}" data-id="${t.id}" id="rec_${t.id}" ${t.rec?'checked':''} aria-label="Recordatorio enviado"></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">No hay turnos pendientes en esa fecha.</p>'}</div>`;
+  ${robotBox()}
+  <p class="muted">Turnos pendientes del ${esc(fdate(f,{weekday:'long',day:'numeric',month:'long'}))}. Para enviar a mano, cada botón abre WhatsApp o el correo con el mensaje ya escrito.</p>
+  <div class="panel">${ts.length?`<div class="row"><button class="btn" data-a="copylist">Copiar lista del día</button></div><div class="scroll"><table><thead><tr><th>Hora</th><th>Paciente</th><th>Teléfono</th><th>Avisar</th><th>Estado</th><th>Enviado</th></tr></thead><tbody>${ts.map(t=>{const p=D.pacientes[t.pid]||{},n=waNum(p.tel),msg=recMsg(f,t);return `<tr><td>${t.hora}</td><td>${esc(pacN(t))}</td><td>${esc(p.tel||'—')}</td><td><div class="row">${n?`<a class="btn s p" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(msg)}" data-a="recok" data-f="${f}" data-id="${t.id}">WhatsApp</a>`:''}${p.mail?`<a class="btn s" href="mailto:${encodeURIComponent(p.mail)}?subject=${encodeURIComponent('Recordatorio de turno')}&body=${encodeURIComponent(msg)}" data-a="recok" data-f="${f}" data-id="${t.id}">Correo</a>`:''}<button class="btn s" data-a="copymsg" data-f="${f}" data-id="${t.id}">Copiar mensaje</button></div></td><td>${recEstado(t)}</td><td><input type="checkbox" data-c="rec" data-f="${f}" data-id="${t.id}" id="rec_${t.id}" ${t.rec?'checked':''} aria-label="Recordatorio enviado"></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">No hay turnos pendientes en esa fecha.</p>'}</div>`;
 }
 async function copy(txt){try{await navigator.clipboard.writeText(txt);toast('Copiado al portapapeles')}catch(e){modal(`<h2>Copiá el texto</h2><textarea id="cp" rows="10" readonly>${esc(txt)}</textarea><div class="row"><button class="btn" data-a="close">Cerrar</button></div>`);$('#cp').select()}}
 
@@ -719,8 +753,11 @@ function vReportes(){
   for(let i=1;i<=n;i++){const ts=Object.values((D.agenda[mth+'-'+p2(i)]||{}).turnos||{});const a=ts.filter(t=>t.estado==='atendido').length;per.push(a);at+=a;au+=ts.filter(t=>t.estado==='ausente').length;pe+=ts.filter(t=>t.estado==='pendiente').length}
   const mx=Math.max(1,...per),nuevos=Object.values(D.pacientes).filter(p=>(p.reg||'').startsWith(mth)).length,h=hoy(),th=Object.entries((D.agenda[h]||{}).turnos||{}).map(([id,t])=>Object.assign({id},t)).sort((a,b)=>a.hora.localeCompare(b.hora));
   const aus=at+au?Math.round(au*100/(at+au)):0;
+  const pm={};for(let i=1;i<=n;i++)Object.values((D.agenda[mth+'-'+p2(i)]||{}).turnos||{}).forEach(t=>{const k=t.mid||'';const r=pm[k]||(pm[k]={tot:0,at:0,au:0,pe:0,pac:new Set(),cob:0,conf:0});r.tot++;r[t.estado==='atendido'?'at':t.estado==='ausente'?'au':'pe']++;if(t.pid)r.pac.add(t.pid);if(t.conf===true)r.conf++;const g=t.pago||{};if(g.e==='pagado')r.cob+=+g.monto||0});
+  const pmx=Math.max(1,...Object.values(pm).map(r=>r.at)),pr=Object.entries(pm).sort((a,b)=>b[1].at-a[1].at);
   return `<div class="vh"><h1>Reportes</h1><div class="row"><input type="month" id="repm" data-c="repm" value="${mth}" aria-label="Mes"><button class="btn" data-a="csv">Exportar mes en CSV</button></div></div>
   <div class="stats"><div class="stat"><b>${at}</b><span>Pacientes atendidos en el mes</span></div><div class="stat"><b>${au}</b><span>Ausentes (${aus} %)</span></div><div class="stat"><b>${pe}</b><span>Turnos pendientes</span></div><div class="stat"><b>${nuevos}</b><span>Pacientes nuevos</span></div></div>
+  <div class="panel"><h2>Por médico</h2>${pr.length?`<div class="scroll"><table><thead><tr><th>Médico</th><th class="n">Turnos</th><th class="n">Atendidos</th><th></th><th class="n">Ausentes</th><th class="n">Pendientes</th><th class="n">Asistencia</th><th class="n">Pacientes</th><th class="n">Cobrado</th></tr></thead><tbody>${pr.map(([k,r])=>{const a=r.at+r.au?Math.round(r.at*100/(r.at+r.au))+' %':'—';return `<tr><td style="white-space:nowrap">${esc(medN(k)||'Sin médico asignado')}</td><td class="n">${r.tot}</td><td class="n"><b>${r.at}</b></td><td style="width:22%"><div class="hb" role="img" aria-label="${r.at} atendidos"><i style="width:${r.at*100/pmx}%"></i></div></td><td class="n">${r.au}</td><td class="n">${r.pe}</td><td class="n">${a}</td><td class="n">${r.pac.size}</td><td class="n" style="white-space:nowrap">${gs(r.cob)}</td></tr>`}).join('')}</tbody></table></div><p class="small muted">Asistencia: atendidos sobre (atendidos + ausentes). Cobrado: pagos registrados como pagados en caja.</p>`:'<p class="muted">No hay turnos en este mes.</p>'}</div>
   <div class="panel"><h2>Atendidos por día</h2><div style="padding-top:18px"><div class="bars" role="img" aria-label="Pacientes atendidos por día del mes">${per.map((v,i)=>`<div style="height:${v*100/mx}%" title="Día ${i+1}: ${v}">${v?`<span>${v}</span>`:''}</div>`).join('')}</div><div class="axis">${per.map((v,i)=>`<span>${(i+1)%5===0||i===0?i+1:''}</span>`).join('')}</div></div></div>
   <div class="panel"><h2>Citas de hoy · ${esc(fdate(h))}</h2>${th.length?`<div class="scroll"><table><thead><tr><th>Hora</th><th>Paciente</th><th>Médico</th><th>Estado</th></tr></thead><tbody>${th.map(t=>`<tr><td>${t.hora}</td><td>${esc(pacN(t))}</td><td>${esc(medN(t.mid))}</td><td><span class="pill e-${t.estado}">${EST[t.estado]}</span></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Hoy no hay citas cargadas.</p>'}</div>`;
 }
@@ -954,6 +991,7 @@ const A={
   npago(d){if(!Object.keys(P.planes).length){toast('Primero creá al menos una membresía.',1);return}pagoForm(d.id)},
   dpago(d){fs.doc('pagos/'+d.id).delete().catch(werr);toast('Pago anulado')},
   nuserdev(d){userForm(d.id)},
+  async togudev(d){const u=P.users[d.id];try{await fs.doc('usuarios/'+d.id).update({activo:u.activo===false});P.users[d.id].activo=u.activo===false;empUsers(d.eid)}catch(e){werr(e)}},
   passdev(d){const u=P.users[d.id];modal(`<h2>Nueva contraseña · ${esc(u.nombre||uName(u))}</h2><form data-s="passdev" class="form"><input type="hidden" name="id" value="${d.id}">
     <label>Usuario<input value="${esc(uName(u))}" id="pd_us" disabled></label><label>Contraseña temporal nueva<input name="pass" id="pd_pass" required minlength="6" value="${tmpPass()}"></label>
     <p class="full small muted">La contraseña anterior deja de funcionar. El usuario deberá crear la suya al ingresar.</p>
@@ -969,7 +1007,6 @@ const A={
     b.delete(fs.doc('empresas/'+d.id));
     try{await b.commit();toast('Consultorio “'+e.nombre+'” y sus usuarios eliminados')}catch(x){werr(x)}
   },
-  async togudev(d){const u=P.users[d.id];try{await fs.doc('usuarios/'+d.id).update({activo:u.activo===false});P.users[d.id].activo=u.activo===false;empUsers(d.eid)}catch(e){werr(e)}},
   async resetu(d){try{await auth.sendPasswordResetEmail(d.email);toast('Correo de restablecimiento enviado a '+d.email)}catch(e){toast(authMsg(e),1)}},
   nplan(){planForm()},
   eplan(d){planForm(d.id)},
@@ -1027,7 +1064,7 @@ const F={
   turno(v){
     const pid=findPac(v.pac);if(!pid){toast('Elegí un paciente de la lista, o registralo primero.',1);return}
     const id=v.id||nid(),old=v.id?D.agenda[v.f0].turnos[v.id]:{};
-    const t=Object.assign({},old,{hora:v.hora,pid,pn:D.pacientes[pid].nombre,mid:v.mid,motivo:v.motivo.trim(),estado:v.estado,pago:{e:v.pe,monto:+v.monto||0,medio:v.medio,conv:v.conv.trim()}});
+    const t=Object.assign({},old,v.id&&(old.hora!==v.hora||v.f0!==v.fecha)?RESET:{},{hora:v.hora,pid,pn:D.pacientes[pid].nombre,mid:v.mid,motivo:v.motivo.trim(),estado:v.estado,pago:{e:v.pe,monto:+v.monto||0,medio:v.medio,conv:v.conv.trim()}});
     if(v.id&&v.f0!==v.fecha)delKey('agenda',v.f0,'turnos',id);
     write('agenda',v.fecha,{fecha:v.fecha,turnos:{[id]:t}},'merge');
     log(v.id?'Modificó turno':'Creó turno',t.pn+' · '+v.fecha+' '+v.hora+' · '+EST[v.estado]+(v.pe?' · '+PAGO[v.pe]:''));closeM();toast('Turno guardado');
@@ -1054,6 +1091,7 @@ const F={
     write('agenda',f,{fecha:f,cierre:{t:Date.now(),uid:ME.uid,ef,tr,tj,contado:+v.contado||0}},'merge');
     log('Cerró caja',f+' · efectivo '+ef+' · contado '+(+v.contado||0));draw();toast('Caja cerrada');
   },
+  recfg(v){const h=t=>/^\d\d:\d\d$/.test(t)?t:'';const d={activo:v.activo==='1',anticip:+v.anticip||0,desde:h(v.desde)||'17:00',hasta:h(v.hasta)||'20:00',plantilla:v.plantilla.trim()||REC_TPL};if(d.hasta<=d.desde){toast('La hora “hasta” debe ser posterior a “desde”.',1);return}write('config','recordatorios',d,'set');log('Configuró recordatorios automáticos',(d.activo?'Activado':'Desactivado')+' · '+d.desde+'–'+d.hasta);toast('Configuración guardada')},
   cfg(v){write('config','consultorio',{nombre:v.nombre.trim(),direccion:v.direccion.trim(),telefono:v.telefono.trim(),ruc:v.ruc.trim(),hoja:v.hoja,moneda:v.moneda.trim()||'Gs.',prefijo:v.prefijo.replace(/\D/g,'')||'595'},'set');log('Modificó datos del consultorio');draw();toast('Datos guardados')},
   async med(v,form){
     const id=v.id||nid(),old=v.id?D.medicos[v.id]:{};
