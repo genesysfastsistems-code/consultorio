@@ -16,7 +16,8 @@
   --shadow:0 1px 2px rgba(15,37,48,.05),0 8px 24px rgba(15,37,48,.06);--ring:0 0 0 3px rgba(14,124,134,.22);
   --font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
-@media (prefers-color-scheme:dark){:root{
+@media (prefers-color-scheme:dark){.frio{background:#12324a;color:#a9d4f5}
+:root{
   --bg:#0a1418;--surface:#122128;--sunk:#0e1b21;--ink:#e4eef1;--muted:#8fa6ae;--line:#22363f;
   --accent:#4cc4c9;--accent-2:#74d7db;--accent-ink:#04262a;--accent-soft:#143a40;
   --side:#07100f;--side-ink:#e4eef1;--side-muted:#8fa6ae;--side-act:#143a40;--side-line:#16272d;
@@ -140,6 +141,19 @@ details>div{display:flex;flex-direction:column;gap:10px;padding-top:12px}
 .hb{height:8px;background:var(--sunk);border-radius:9px;overflow:hidden;min-width:70px}.hb i{display:block;height:100%;background:var(--accent);border-radius:9px}
 .rbt{display:flex;gap:10px;align-items:flex-start}.dot{width:10px;height:10px;margin-top:6px;border-radius:50%;flex:none;background:var(--muted)}.dot.on{background:#1f9d5c;box-shadow:0 0 0 4px rgba(31,157,92,.18)}.dot.off{background:#d14b3a}
 .vars code{background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12px}
+.sem-g{background:var(--ok-bg);color:var(--ok-ink)}.sem-y{background:var(--warn-bg);color:var(--warn-ink)}.sem-r{background:var(--bad-bg);color:var(--bad-ink)}
+.frio{background:#dcecfb;color:#0b4a7a}
+.cnt{display:inline-block;background:var(--bad-ink);color:#fff;border-radius:99px;padding:0 6px;font-size:11px;line-height:17px;margin-left:2px}
+.pos{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}.pos .col{display:flex;flex-direction:column;gap:18px;min-width:0}
+@media (max-width:1050px){.pos{grid-template-columns:minmax(0,1fr)}}
+.res{display:flex;flex-direction:column;max-height:430px;overflow:auto}.ri{display:flex;gap:10px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line);flex-wrap:wrap}.ri:last-child{border-bottom:0}
+.bad{color:var(--bad-ink)}.lnk{all:unset;cursor:pointer;color:var(--accent);font-weight:700;text-decoration:underline}
+.tot{display:flex;flex-direction:column;gap:6px}.tot div{display:flex;justify-content:space-between;gap:10px}.tot span{color:var(--muted)}.tot .big{font-size:18px;border-top:1px solid var(--line);padding-top:8px}.tot .big span{color:var(--ink);font-weight:700}
+.btn.big{justify-content:center;padding:13px;font-size:15px;width:100%}
+label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:13.5px}
+.cart select{padding:6px 8px}.cart td,.cart th{padding:9px 8px}
+.seg .btn{white-space:nowrap}
+@media (max-width:640px){table.cart thead{display:none}table.cart tr{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:10px 0;border-bottom:1px solid var(--line)}table.cart td{border:0;padding:2px 0}table.cart td:first-child{grid-column:1/-1}table.cart td.n{text-align:left}}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column-reverse;gap:4px}
 .stat b{display:block;font-size:22px;font-weight:800;letter-spacing:-.02em;overflow-wrap:anywhere}
@@ -350,7 +364,9 @@ const ICONS={
  ventas:'<path d="M22 7l-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
  salir:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
  clave:'<circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/>',
- mas:'<path d="M12 5v14M5 12h14"/>'
+ mas:'<path d="M12 5v14M5 12h14"/>',
+ pos:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.1a2 2 0 0 0 2-1.5L21.5 8H6.2"/>',
+ inventario:'<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>'
 };
 const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]||''}</svg>`;
 const brand=(t,sub)=>`<span class="logo">${ic('logo')}</span><div><b>${esc(t)}</b><small>${esc(sub)}</small></div>`;
@@ -364,14 +380,15 @@ const uOk=u=>/^[a-z0-9._-]{3,30}$/.test(u);
 const conCorreo=u=>!!u.email&&!u.email.endsWith(UDOM);
 
 /* ---------- estado ---------- */
-const D={pacientes:{},agenda:{},medicos:{},config:{},firmas:{},clinico:{},usuarios:{}};
+const D={pacientes:{},agenda:{},medicos:{},config:{},firmas:{},clinico:{},usuarios:{},productos:{},ventas:{},temperaturas:{},contadores:{}};
 const P={emp:{},planes:{},pagos:{},users:{}};
-const S={view:'agenda',dv:'resumen',pid:null,ag:{modo:'dia',f:hoy(),q:'',mid:''},pq:'',hq:'',cajaF:hoy(),recF:addD(hoy(),1),repM:hoy().slice(0,7),t:{dx:[],rx:[]},aud:null};
+const S={view:'agenda',dv:'resumen',pid:null,ag:{modo:'dia',f:hoy(),q:'',mid:''},pq:'',hq:'',cajaF:hoy(),recF:addD(hoy(),1),repM:hoy().slice(0,7),t:{dx:[],rx:[]},aud:null,inv:{tab:'prod',q:'',t:'',sv:'',tz:null},pos:{tab:'nueva',q:'',it:[],f:{cond:'contado',medio:'efectivo'},dia:hoy(),mes:hoy().slice(0,7)}};
 let clinicSubs=[],auth=null,fs=null,ME=null,UDOC=null,EID=null,EMP=null,ROL='',MODE='',unsubs=[],clinUnsub=null,OLD={},loaded={},DESDE='';
 const medico=()=>ROL==='admin'||ROL==='medico';
 const admin=()=>ROL==='admin';
 const cfg=()=>D.config.consultorio||{};
-const gs=n=>(MODE==='dev'?'Gs.':(cfg().moneda||'Gs.'))+' '+Number(n||0).toLocaleString('es');
+const miles=n=>{n=Math.round(+n||0);return (n<0?'-':'')+String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.')};
+const gs=n=>(MODE==='dev'?'Gs.':(cfg().moneda||'Gs.'))+' '+miles(n);
 const col=c=>fs.collection('empresas/'+EID+'/'+c);
 function deep(t,s){for(const k in s){const v=s[k];if(v&&typeof v==='object'&&!Array.isArray(v))t[k]=deep(t[k]&&typeof t[k]==='object'&&!Array.isArray(t[k])?t[k]:{},v);else t[k]=v}return t}
 function werr(e){toast(e&&e.code==='permission-denied'?'Tu usuario no tiene permiso para esta acción, o la membresía no está activa.':e&&e.code==='resource-exhausted'?'Se alcanzó el límite diario gratuito de la base de datos. Probá mañana.':'No se pudo guardar. Revisá la conexión e intentá de nuevo.',1)}
@@ -389,7 +406,8 @@ function delKey(c,id,k,sub){
 }
 function log(a,d){col('auditoria').add({t:Date.now(),uid:ME.uid,n:UDOC.nombre||ME.email,a,d:d||''}).catch(()=>{})}
 const snapObj=s=>{const o={};s.forEach(d=>{o[d.id]=d.data()});return o};
-function sub(c,q){unsubs.push(q.onSnapshot(s=>{const o=snapObj(s);D[c]=c==='agenda'?Object.assign({},OLD,o):o;render()},()=>{}))}
+function sub(c,q){unsubs.push(q.onSnapshot(s=>{const o=snapObj(s);D[c]=c==='agenda'?Object.assign({},OLD,o):c==='ventas'?Object.assign({},VOLD,o):o;render()},()=>{}))}
+let VOLD={};
 function ensureMonth(m){
   if(!m||m+'-31'>=DESDE&&m+'-01'>=DESDE||loaded[m])return;loaded[m]=1;
   col('agenda').where('fecha','>=',m+'-01').where('fecha','<=',m+'-31').get().then(s=>{s.forEach(d=>{if(d.id<DESDE){OLD[d.id]=D.agenda[d.id]=d.data()}});render()}).catch(()=>{loaded[m]=0});
@@ -451,11 +469,15 @@ async function entrar(u){
 function stopClinic(){clinicSubs.forEach(u=>u());clinicSubs=[];if(clinUnsub){clinUnsub();clinUnsub=null}}
 function startClinic(){
   stopClinic();const keep=unsubs;unsubs=[];
-  const d=new Date();DESDE=ymd(new Date(d.getFullYear(),d.getMonth()-2,1));OLD={};loaded={};
+  const d=new Date();DESDE=ymd(new Date(d.getFullYear(),d.getMonth()-2,1));OLD={};loaded={};VOLD={};Object.keys(vloaded).forEach(k=>delete vloaded[k]);
   sub('pacientes',col('pacientes').limit(3000));
   sub('agenda',col('agenda').where('fecha','>=',DESDE));
   sub('medicos',col('medicos'));
   sub('config',col('config'));
+  sub('productos',col('productos'));
+  sub('ventas',col('ventas').where('fecha','>=',DESDE));
+  sub('temperaturas',col('temperaturas').where('fecha','>=',addD(hoy(),-30)));
+  sub('contadores',col('contadores'));
   if(medico())sub('firmas',col('firmas'));
   if(admin())sub('usuarios',fs.collection('usuarios').where('empresaId','==',EID));
   clinicSubs=unsubs;unsubs=keep;
@@ -465,10 +487,11 @@ function startClinic(){
 let rp=false;
 function render(){if(!MODE||$('#app').hidden)return;const a=document.activeElement;if(a&&$('#main').contains(a)&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&!/date|month|checkbox|file/.test(a.type)){rp=true;return}draw()}
 document.addEventListener('focusout',()=>{if(rp)setTimeout(render,60)});
-const NAV=[['agenda','Agenda de turnos'],['pacientes','Pacientes'],['historial','Historial médico',1],['recetas','Recetas y órdenes',1],['caja','Caja'],['recordatorios','Recordatorios'],['reportes','Reportes'],['auditoria','Auditoría',2],['config','Configuración',2]];
+const NAV=[['agenda','Agenda de turnos'],['pacientes','Pacientes'],['historial','Historial médico',1],['recetas','Recetas y órdenes',1],['caja','Caja'],['pos','Ventas'],['inventario','Inventario'],['recordatorios','Recordatorios'],['reportes','Reportes'],['auditoria','Auditoría',2],['config','Configuración',2]];
 const DNAV=[['resumen','Resumen'],['empresas','Consultorios'],['planes','Membresías'],['ventas','Ventas']];
-const ROLN={admin:'Administrador',medico:'Médico',recepcion:'Recepción',dev:'Desarrollador'};
-const puede=n=>!n[2]||(n[2]===1?medico():admin());
+const ROLN={admin:'Administrador',medico:'Médico',recepcion:'Recepción',farmacia:'Farmacia',dev:'Desarrollador'};
+const ACC={pos:['admin','recepcion','farmacia'],inventario:['admin','farmacia','recepcion','medico']};
+const puede=n=>ROL==='farmacia'?n[0]==='pos'||n[0]==='inventario':ACC[n[0]]?ACC[n[0]].includes(ROL):(!n[2]||(n[2]===1?medico():admin()));
 function draw(){
   rp=false;
   if(MODE==='dev'){
@@ -478,10 +501,11 @@ function draw(){
     $('#main').innerHTML=({resumen:dResumen,empresas:dEmpresas,planes:dPlanes,ventas:dVentas})[S.dv]();return;
   }
   $('#brand').innerHTML=brand(cfg().nombre||(EMP&&EMP.nombre)||'Consultorio Médico','Gestión de pacientes y turnos');
-  $('#nav').innerHTML=NAV.filter(puede).map(n=>`<button data-a="nav" data-v="${n[0]}" ${S.view===n[0]||(n[0]==='pacientes'&&S.view==='paciente')?'aria-current="page"':''}>${ic(n[0])}<span>${n[1]}</span></button>`).join('');
+  const ia=NAV.some(n=>n[0]==='inventario'&&puede(n))?alertasInv():null,ib=ia?ia.venc.length+ia.crit.length+(ia.frio?1:0):0;
+  $('#nav').innerHTML=NAV.filter(puede).map(n=>`<button data-a="nav" data-v="${n[0]}" ${S.view===n[0]||(n[0]==='pacientes'&&S.view==='paciente')?'aria-current="page"':''}>${ic(n[0])}<span>${n[1]}</span>${n[0]==='inventario'&&ib?`<span class="cnt" title="Alertas de inventario">${ib}</span>`:''}</button>`).join('');
   $('#role').innerHTML=roleBox(UDOC.nombre||uName(UDOC),ROLN[ROL]||'');
-  if(NAV.some(n=>n[0]===S.view&&!puede(n)))S.view='agenda';
-  const V={agenda:vAgenda,pacientes:vPacientes,paciente:vPaciente,historial:vHistorial,recetas:vRecetas,caja:vCaja,recordatorios:vRecord,reportes:vReportes,auditoria:vAud,config:vConfig};
+  if(NAV.some(n=>n[0]===S.view&&!puede(n))||(ROL==='farmacia'&&!['pos','inventario'].includes(S.view)))S.view=NAV.find(puede)[0];
+  const V={agenda:vAgenda,pacientes:vPacientes,paciente:vPaciente,historial:vHistorial,recetas:vRecetas,caja:vCaja,recordatorios:vRecord,reportes:vReportes,pos:vPos,inventario:vInv,auditoria:vAud,config:vConfig};
   let av='';if(EMP&&EMP.vence){const dd=Math.ceil((EMP.vence.toDate()-new Date())/864e5);if(dd<=7)av=`<div class="banner">La membresía del consultorio vence en ${dd} día${dd===1?'':'s'}. Comunicate con tu proveedor para renovarla.</div>`}
   $('#main').innerHTML=av+V[S.view]();
 }
@@ -762,6 +786,411 @@ function vReportes(){
   <div class="panel"><h2>Citas de hoy · ${esc(fdate(h))}</h2>${th.length?`<div class="scroll"><table><thead><tr><th>Hora</th><th>Paciente</th><th>Médico</th><th>Estado</th></tr></thead><tbody>${th.map(t=>`<tr><td>${t.hora}</td><td>${esc(pacN(t))}</td><td>${esc(medN(t.mid))}</td><td><span class="pill e-${t.estado}">${EST[t.estado]}</span></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Hoy no hay citas cargadas.</p>'}</div>`;
 }
 
+/* ---------- FARMACIA: INVENTARIO ---------- */
+const TIPOS={libre:'Venta libre',receta:'Bajo receta',controlado:'Receta archivada',insumo:'Insumo médico'};
+const TIPC={libre:'e-atendido',receta:'e-pendiente',controlado:'e-ausente',insumo:'neutral'};
+const SEG_DEF=[{n:'IPS',pct:100,ruc:''},{n:'Asismed',pct:30,ruc:''},{n:'Migone',pct:30,ruc:''}];
+const cfF=()=>D.config.farmacia||{};
+const cfFac=()=>D.config.facturacion||{};
+const segs=()=>(cfF().seguros&&cfF().seguros.length)?cfF().seguros:SEG_DEF;
+const inv=()=>ROL==='admin'||ROL==='farmacia';
+const alertaD=()=>+(cfF().alertaDias||90);
+const xc=p=>Math.max(1,+p.xcaja||1);
+const pU=p=>+p.punid||Math.round((+p.pcaja||0)/xc(p));
+const minU=p=>(+p.minC||0)*xc(p);
+const fdmy=v=>v?v.slice(8,10)+'/'+v.slice(5,7)+'/'+v.slice(0,4):'—';
+const gsn=miles;
+const plu=s=>{s=String(s||'').toLowerCase();return /[aeiou]$/.test(s)?s+'s':s+'es'};
+const prods=()=>Object.entries(D.productos).map(([id,p])=>Object.assign({id},p)).filter(p=>p.activo!==false).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+const lotesOf=p=>Object.entries(p.lotes||{}).map(([lid,l])=>Object.assign({lid},l)).filter(l=>l.c>0).sort((a,b)=>a.v.localeCompare(b.v));
+const stockU=p=>lotesOf(p).reduce((s,l)=>s+l.c,0);
+const dispU=p=>lotesOf(p).filter(l=>l.v>=hoy()).reduce((s,l)=>s+l.c,0);
+function sem(v){const h=hoy();return v<h?'r':v<=addD(h,alertaD())?'y':'g'}
+const SEMN={r:'Vencido',y:'Próximo a vencer',g:'En buen estado'};
+const semPill=v=>`<span class="pill sem-${sem(v)}" title="${SEMN[sem(v)]}">${fdmy(v)}</span>`;
+function fmtU(p,u){const x=xc(p),uc=p.ucompra||'Caja',uv=p.uventa||'Unidad';if(x===1)return u+' '+(u===1?uc.toLowerCase():plu(uc));const c=Math.floor(u/x),r=u%x;return [c?c+' '+(c===1?uc.toLowerCase():plu(uc)):'',r?r+' '+(r===1?uv.toLowerCase():plu(uv)):''].filter(Boolean).join(' + ')||'0'}
+function alloc(p,u){const r=[];for(const l of lotesOf(p).filter(l=>l.v>=hoy())){if(u<=0)break;const t=Math.min(u,l.c);r.push({lid:l.lid,l:l.l,v:l.v,c:t});u-=t}return u>0?null:r}
+function alertasInv(){
+  const a={venc:[],prox:[],crit:[],frio:null},h=hoy();
+  prods().forEach(p=>{lotesOf(p).forEach(l=>{const s=sem(l.v);if(s==='r')a.venc.push([p,l]);else if(s==='y')a.prox.push([p,l])});if(minU(p)&&dispU(p)<=minU(p))a.crit.push(p)});
+  if(prods().some(p=>p.frio&&stockU(p)>0)){const T=(D.temperaturas[h]||{}).r||[],last=T[T.length-1],mn=+(cfF().tmin??2),mx=+(cfF().tmax??8);
+    a.frio=!last?'Falta registrar hoy la temperatura de la heladera.':(last.t<mn||last.t>mx)?`Última temperatura ${last.t} °C, fuera del rango ${mn} a ${mx} °C. Revisá la heladera y los productos refrigerados.`:null}
+  return a;
+}
+function invAlerts(a){return [a.venc.length?`<div class="alert r"><b>Vencidos</b>${a.venc.length} lote${a.venc.length===1?'':'s'} vencido${a.venc.length===1?'':'s'}: la venta está bloqueada. Dalos de baja en Vencimientos.</div>`:'',
+  a.crit.length?`<div class="alert y"><b>Stock crítico</b>${a.crit.length} producto${a.crit.length===1?'':'s'} en o por debajo del mínimo. Mirá el pedido sugerido en Reposición.</div>`:'',
+  a.frio?`<div class="alert y"><b>Cadena de frío</b>${esc(a.frio)}</div>`:''].join('')}
+function vInv(){
+  const t=S.inv.tab,a=alertasInv(),nv=a.venc.length+a.prox.length;
+  const tabs=[['prod','Productos'],['venc','Vencimientos',nv],['repo','Reposición',a.crit.length],['frio','Cadena de frío',a.frio?1:0],['traz','Trazabilidad']];
+  return `<div class="vh"><h1>Inventario</h1>${inv()?`<button class="btn p" data-a="nprod">${ic('mas')}Nuevo producto</button>`:''}</div>${invAlerts(a)}
+  <div class="scroll"><div class="seg">${tabs.map(([k,l,n])=>`<button class="btn" data-a="invtab" data-v="${k}" aria-pressed="${t===k}">${l}${n?` <span class="cnt">${n}</span>`:''}</button>`).join('')}</div></div>
+  ${({prod:invProd,venc:invVenc,repo:invRepo,frio:invFrio,traz:invTraz})[t](a)}`;
+}
+function filtProd(q,t){const n=norm(q);return prods().filter(p=>(!t||(t==='frio'?p.frio:p.tipo===t))&&(!n||norm([p.nombre,p.mono,p.lab,p.codigo].join(' ')).includes(n)))}
+function invProd(){
+  return `<div class="panel"><div class="row"><input type="search" class="grow" id="invq" data-i="invq" value="${esc(S.inv.q)}" placeholder="Buscar por nombre, principio activo o código" aria-label="Buscar producto">
+  <select id="invt" data-c="invt" aria-label="Filtrar por tipo"><option value="">Todos los tipos</option>${Object.entries(TIPOS).map(([k,v])=>`<option value="${k}" ${S.inv.t===k?'selected':''}>${v}</option>`).join('')}<option value="frio" ${S.inv.t==='frio'?'selected':''}>Cadena de frío</option></select></div>
+  <div id="invlist">${invRows()}</div></div>`;
+}
+function invRows(){
+  const ps=filtProd(S.inv.q,S.inv.t);
+  if(!ps.length)return `<p class="muted">${prods().length?'Ningún producto coincide con la búsqueda.':'Todavía no hay productos cargados.'+(admin()?' Podés cargar productos de ejemplo en Configuración.':'')}</p>`;
+  return `<div class="scroll"><table><thead><tr><th>Producto</th><th>Tipo</th><th class="n">Disponible</th><th>Próximo vencimiento</th><th class="n">Precio ${'caja'}</th><th class="n">Precio fracción</th><th></th></tr></thead><tbody>${ps.map(p=>{
+    const d=dispU(p),ls=lotesOf(p),cr=minU(p)&&d<=minU(p);
+    return `<tr><td><b>${esc(p.nombre)}</b>${p.frio?' <span class="pill frio">Frío</span>':''}<div class="small muted">${esc([p.mono,p.lab,p.codigo].filter(Boolean).join(' · '))}</div></td>
+    <td><span class="pill ${TIPC[p.tipo]||'neutral'}">${TIPOS[p.tipo]||'—'}</span></td>
+    <td class="n" style="white-space:nowrap">${cr?'<span class="pill e-ausente">Crítico</span> ':''}${fmtU(p,d)}</td>
+    <td>${ls.length?semPill(ls[0].v):'<span class="muted">Sin stock</span>'}</td>
+    <td class="n" style="white-space:nowrap">${gs(p.pcaja)}</td><td class="n" style="white-space:nowrap">${p.fracc&&xc(p)>1?gs(pU(p))+' <span class="small muted">/'+esc((p.uventa||'unidad').toLowerCase())+'</span>':'—'}</td>
+    <td><div class="row">${inv()?`<button class="btn s p" data-a="ilote" data-id="${p.id}">Ingresar lote</button><button class="btn s" data-a="eprod" data-id="${p.id}">Editar</button>`:''}<button class="btn s" data-a="vlotes" data-id="${p.id}">Lotes</button></div></td></tr>`}).join('')}</tbody></table></div>`;
+}
+function prodForm(id){
+  const p=id?D.productos[id]:{tipo:'libre',ucompra:'Caja',uventa:'Comprimido',xcaja:1,fracc:false,iva:5,minC:0};
+  modal(`<h2>${id?'Editar producto':'Nuevo producto'}</h2><form data-s="prod" class="form"><input type="hidden" name="id" value="${id||''}">
+  <label class="full">Nombre comercial y presentación<input name="nombre" id="pr_nombre" required value="${esc(p.nombre||'')}" placeholder="Ej.: Dolorsin 500 mg x 20 comprimidos"></label>
+  <label>Principio activo (monodroga)<input name="mono" id="pr_mono" value="${esc(p.mono||'')}" placeholder="Ej.: Paracetamol"></label>
+  <label>Laboratorio<input name="lab" id="pr_lab" value="${esc(p.lab||'')}"></label>
+  <label>Código de barras<input name="codigo" id="pr_codigo" value="${esc(p.codigo||'')}"></label>
+  <label>Tipo<select name="tipo" id="pr_tipo">${Object.entries(TIPOS).map(([k,v])=>`<option value="${k}" ${p.tipo===k?'selected':''}>${v}</option>`).join('')}</select></label>
+  <label>Cadena de frío<select name="frio" id="pr_frio"><option value="0">No</option><option value="1" ${p.frio?'selected':''}>Sí, requiere refrigeración</option></select></label>
+  <label>IVA<select name="iva" id="pr_iva"><option value="5" ${+p.iva===5?'selected':''}>5 %</option><option value="10" ${+p.iva===10?'selected':''}>10 %</option><option value="0" ${+p.iva===0?'selected':''}>Exenta</option></select></label>
+  <label>Unidad de compra<input name="ucompra" id="pr_ucompra" value="${esc(p.ucompra||'Caja')}"></label>
+  <label>Unidad de venta fraccionada<input name="uventa" id="pr_uventa" value="${esc(p.uventa||'Comprimido')}" placeholder="Comprimido, blíster, ampolla…"></label>
+  <label>Unidades por ${esc((p.ucompra||'caja').toLowerCase())}<input type="number" name="xcaja" id="pr_xcaja" min="1" step="1" value="${xc(p)}"></label>
+  <label>Venta fraccionada<select name="fracc" id="pr_fracc"><option value="0">No, solo entera</option><option value="1" ${p.fracc?'selected':''}>Sí, permite fraccionar</option></select></label>
+  <label>Precio de venta por ${esc((p.ucompra||'caja').toLowerCase())}<input type="number" name="pcaja" id="pr_pcaja" min="0" step="any" required value="${p.pcaja??''}"></label>
+  <label>Precio por unidad fraccionada<input type="number" name="punid" id="pr_punid" min="0" step="any" value="${p.punid||''}" placeholder="Automático: precio ÷ unidades"></label>
+  <label>Stock crítico (en ${esc(plu(p.ucompra||'caja'))})<input type="number" name="minC" id="pr_minC" min="0" step="1" value="${p.minC||0}"></label>
+  <label>Proveedor habitual<input name="prov" id="pr_prov" value="${esc(p.prov||'')}"></label>
+  <p class="full small muted">Los medicamentos de receta archivada (controlados o psicotrópicos) exigen registrar médico, registro profesional y paciente al venderlos. Si dejás vacío el precio por unidad, se calcula solo.</p>
+  <div class="full row"><button class="btn p">Guardar</button>${id?`<button type="button" class="btn d" data-a="dprod" data-id="${id}" data-confirm="Confirmar: quitar del catálogo">Quitar del catálogo</button>`:''}<button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
+}
+function loteForm(id){
+  const p=D.productos[id];
+  modal(`<h2>Ingresar lote · ${esc(p.nombre)}</h2><form data-s="lote" class="form"><input type="hidden" name="id" value="${id}">
+  <label>Número de lote del laboratorio<input name="l" id="lt_l" required autocomplete="off"></label>
+  <label>Fecha de vencimiento<input type="date" name="v" id="lt_v" required min="${hoy()}"></label>
+  <label>Cantidad (${esc(plu(p.ucompra||'caja'))})<input type="number" name="cajas" id="lt_cajas" min="0" step="1" value="1"></label>
+  ${xc(p)>1?`<label>${esc(plu(p.uventa||'unidad'))} sueltos<input type="number" name="sueltas" id="lt_sueltas" min="0" step="1" value="0"></label>`:''}
+  <label>Costo por ${esc((p.ucompra||'caja').toLowerCase())}<input type="number" name="costo" id="lt_costo" min="0" step="any"></label>
+  <label>Proveedor<input name="prov" id="lt_prov" value="${esc(p.prov||'')}"></label>
+  <label>Factura de compra N°<input name="fac" id="lt_fac"></label>
+  ${p.frio?'<p class="full alert y"><b>Cadena de frío</b>Guardá este producto en la heladera apenas lo recibas (2 a 8 °C).</p>':''}
+  <div class="full row"><button class="btn p">Ingresar al stock</button><button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
+}
+function lotesModal(id){
+  const p=D.productos[id],ls=Object.entries(p.lotes||{}).map(([lid,l])=>Object.assign({lid},l)).sort((a,b)=>a.v.localeCompare(b.v));
+  modal(`<h2>Lotes · ${esc(p.nombre)}</h2><p class="muted">Disponible para la venta: <b>${fmtU(p,dispU(p))}</b>. Se vende primero el lote que vence antes.</p>
+  ${ls.length?`<div class="scroll"><table><thead><tr><th>Lote</th><th>Vence</th><th>Estado</th><th class="n">Stock</th><th>Ingreso</th>${inv()?'<th></th>':''}</tr></thead><tbody>${ls.map(l=>`<tr><td><b>${esc(l.l)}</b></td><td>${fdmy(l.v)}</td><td><span class="pill sem-${sem(l.v)}">${SEMN[sem(l.v)]}</span></td><td class="n">${fmtU(p,l.c)}</td><td class="small">${fdmy(l.ing)}${l.prov?' · '+esc(l.prov):''}${l.fac?' · Fact. '+esc(l.fac):''}</td>${inv()?`<td>${l.c>0?`<button class="btn s" data-a="ajus" data-id="${id}" data-l="${l.lid}">Ajustar</button>`:''}</td>`:''}</tr>`).join('')}</tbody></table></div>`:'<p class="muted">Sin lotes ingresados.</p>'}
+  <div class="row">${inv()?`<button class="btn p" data-a="ilote" data-id="${id}">Ingresar lote</button>`:''}<button class="btn" data-a="close">Cerrar</button></div>`);
+}
+function ajusForm(id,lid){
+  const p=D.productos[id],l=p.lotes[lid];
+  modal(`<h2>Ajustar stock · ${esc(p.nombre)}</h2><p class="muted">Lote <b>${esc(l.l)}</b>, vence ${fdmy(l.v)}. Stock actual: <b>${fmtU(p,l.c)}</b> (${l.c} ${esc(plu(xc(p)>1?p.uventa||'unidad':p.ucompra||'caja'))}).</p>
+  <form data-s="ajus" class="form"><input type="hidden" name="id" value="${id}"><input type="hidden" name="lid" value="${lid}">
+  <label>Movimiento<select name="tipo" id="aj_tipo"><option value="baja">Baja (vencido, roto, devuelto)</option><option value="conteo">Corregir por conteo físico</option></select></label>
+  <label>Cantidad en ${esc(plu(xc(p)>1?p.uventa||'unidad':p.ucompra||'caja'))}<input type="number" name="c" id="aj_c" min="0" step="1" required value="${sem(l.v)==='r'?l.c:''}"></label>
+  <label class="full">Motivo<input name="motivo" id="aj_motivo" required value="${sem(l.v)==='r'?'Producto vencido':''}"></label>
+  <p class="full small muted">Baja: la cantidad se descuenta. Conteo físico: la cantidad pasa a ser el stock real del lote.</p>
+  <div class="full row"><button class="btn p">Guardar</button><button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
+}
+function invVenc(){
+  const rows=[];prods().forEach(p=>lotesOf(p).forEach(l=>rows.push([p,l])));rows.sort((a,b)=>a[1].v.localeCompare(b[1].v));
+  const f=S.inv.sv,rs=rows.filter(([p,l])=>!f||sem(l.v)===f);
+  return `<div class="panel"><div class="vh"><h2>Lotes por vencimiento</h2><div class="seg">${[['','Todos'],['r','Vencidos'],['y','Próximos'],['g','En buen estado']].map(([k,l])=>`<button class="btn" data-a="invsv" data-v="${k}" aria-pressed="${f===k}">${l}</button>`).join('')}</div></div>
+  <p class="small muted"><span class="pill sem-g">Verde</span> más de ${alertaD()} días · <span class="pill sem-y">Amarillo</span> vence en ${alertaD()} días o menos · <span class="pill sem-r">Rojo</span> vencido, bloqueado para la venta.</p>
+  ${rs.length?`<div class="scroll"><table><thead><tr><th>Producto</th><th>Lote</th><th>Vence</th><th class="n">Días</th><th class="n">Stock</th><th></th></tr></thead><tbody>${rs.map(([p,l])=>{const dd=Math.round((pd(l.v)-pd(hoy()))/864e5);return `<tr><td><b>${esc(p.nombre)}</b>${p.frio?' <span class="pill frio">Frío</span>':''}<div class="small muted">${esc(p.mono||'')}</div></td><td>${esc(l.l)}</td><td>${semPill(l.v)}</td><td class="n">${dd<0?'Vencido hace '+(-dd):dd}</td><td class="n">${fmtU(p,l.c)}</td><td>${inv()&&sem(l.v)==='r'?`<button class="btn s d" data-a="ajus" data-id="${p.id}" data-l="${l.lid}">Dar de baja</button>`:''}</td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">No hay lotes en esta categoría.</p>'}</div>`;
+}
+function sugerido(p){const x=xc(p),d=dispU(p);return Math.max(1,Math.ceil((minU(p)*2-d)/x))}
+function invRepo(a){
+  const ps=a.crit;
+  if(!ps.length)return '<div class="panel"><p class="muted">Ningún producto está en stock crítico. Configurá el stock crítico de cada producto al editarlo.</p></div>';
+  const g={};ps.forEach(p=>(g[p.prov||'Sin proveedor']=g[p.prov||'Sin proveedor']||[]).push(p));
+  return Object.entries(g).map(([pv,list])=>`<div class="panel"><div class="vh"><h2>Pedido sugerido · ${esc(pv)}</h2><div class="row"><button class="btn s" data-a="ocpdf" data-v="${esc(pv)}">Orden de compra PDF</button><button class="btn s" data-a="occopy" data-v="${esc(pv)}">Copiar pedido</button></div></div>
+  <div class="scroll"><table><thead><tr><th>Producto</th><th class="n">Disponible</th><th class="n">Stock crítico</th><th class="n">Pedir</th></tr></thead><tbody>${list.map(p=>`<tr><td><b>${esc(p.nombre)}</b><div class="small muted">${esc([p.mono,p.lab].filter(Boolean).join(' · '))}</div></td><td class="n">${fmtU(p,dispU(p))}</td><td class="n">${p.minC} ${esc(plu(p.ucompra||'caja'))}</td><td class="n"><b>${sugerido(p)} ${esc(plu(p.ucompra||'caja'))}</b></td></tr>`).join('')}</tbody></table></div>
+  <p class="small muted">Cantidad sugerida para llegar al doble del stock crítico.</p></div>`).join('');
+}
+function pedidoTxt(pv){return 'Pedido de '+(cfg().nombre||(EMP&&EMP.nombre)||'')+' · '+fdate(hoy())+'\n'+alertasInv().crit.filter(p=>(p.prov||'Sin proveedor')===pv).map(p=>'- '+sugerido(p)+' '+plu(p.ucompra||'caja')+' de '+p.nombre+(p.lab?' ('+p.lab+')':'')).join('\n')}
+function ocPdf(pv){
+  const J=window.jspdf&&window.jspdf.jsPDF;if(!J){toast('No se pudo cargar el generador de PDF. Revisá la conexión.',1);return}
+  const d=new J({unit:'mm',format:'a4'}),f=cfFac(),ps=alertasInv().crit.filter(p=>(p.prov||'Sin proveedor')===pv);let y=20;
+  d.setFont('helvetica','bold');d.setFontSize(15);d.text('ORDEN DE COMPRA',15,y);d.setFontSize(10);d.text(fdate(hoy()),195,y,{align:'right'});y+=8;
+  d.setFont('helvetica','normal');d.text((f.razon||cfg().nombre||'')+(f.ruc?' · RUC '+f.ruc:''),15,y);y+=5;d.text('Proveedor: '+pv,15,y);y+=10;
+  d.setFont('helvetica','bold');d.text('Cantidad',15,y);d.text('Producto',45,y);d.text('Principio activo',140,y);y+=2;d.line(15,y,195,y);y+=6;d.setFont('helvetica','normal');
+  ps.forEach(p=>{const t=d.splitTextToSize(p.nombre,90);d.text(sugerido(p)+' '+plu(p.ucompra||'caja'),15,y);d.text(t,45,y);d.text(d.splitTextToSize(p.mono||'',55),140,y);y+=t.length*5+3;if(y>275){d.addPage();y=20}});
+  const w=window.open(d.output('bloburl'),'_blank');if(!w)d.save('Orden de compra.pdf');
+}
+function invFrio(a){
+  const fr=prods().filter(p=>p.frio),h=hoy(),mn=+(cfF().tmin??2),mx=+(cfF().tmax??8);
+  const dias=Object.keys(D.temperaturas).sort().reverse().slice(0,14);
+  return `${a.frio?'':`<div class="alert" style="background:var(--ok-bg);color:var(--ok-ink)"><b>Cadena de frío</b>Temperatura de hoy registrada y dentro del rango.</div>`}
+  <div class="panel"><h2>Registrar temperatura de la heladera</h2><form data-s="temp" class="row"><label>Temperatura (°C)<input type="number" name="t" id="tp_t" step="0.1" required style="width:140px"></label><button class="btn p" style="align-self:flex-end">Registrar</button><span class="small muted" style="align-self:flex-end">Rango permitido: ${mn} a ${mx} °C. Registrala al menos una vez al día.</span></form>
+  ${dias.length?`<div class="scroll"><table><thead><tr><th>Fecha</th><th>Lecturas</th></tr></thead><tbody>${dias.map(f=>`<tr><td style="white-space:nowrap">${fdate(f)}</td><td><div class="row">${((D.temperaturas[f]||{}).r||[]).map(r=>`<span class="pill ${r.t<mn||r.t>mx?'sem-r':'sem-g'}" title="${esc(r.n||'')}">${r.h} · ${r.t} °C</span>`).join('')}</div></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Todavía no hay lecturas registradas.</p>'}</div>
+  <div class="panel"><h2>Productos refrigerados</h2>${fr.length?`<div class="scroll"><table><thead><tr><th>Producto</th><th class="n">Stock</th><th>Próximo vencimiento</th></tr></thead><tbody>${fr.map(p=>{const ls=lotesOf(p);return `<tr><td><b>${esc(p.nombre)}</b><div class="small muted">${esc(p.mono||'')}</div></td><td class="n">${fmtU(p,stockU(p))}</td><td>${ls.length?semPill(ls[0].v):'—'}</td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">Ningún producto marcado como cadena de frío.</p>'}</div>`;
+}
+function invTraz(){
+  const r=S.inv.tz;
+  return `<div class="panel"><h2>Trazabilidad por lote</h2><p class="muted">Buscá un número de lote para ver cuándo ingresó y a quién se vendió (por ejemplo, ante un retiro del mercado).</p>
+  <form data-s="traz" class="row"><input name="l" id="tz_l" class="grow" required placeholder="Número de lote" value="${esc(r?r.l:'')}" autocomplete="off"><button class="btn p">Buscar</button></form>
+  ${!r?'':r.cargando?'<p class="muted">Buscando…</p>':`
+    ${r.lotes.length?`<h3>Ingresos</h3><div class="scroll"><table><thead><tr><th>Producto</th><th>Lote</th><th>Vence</th><th>Ingreso</th><th class="n">Stock actual</th></tr></thead><tbody>${r.lotes.map(([p,l])=>`<tr><td>${esc(p.nombre)}</td><td>${esc(l.l)}</td><td>${semPill(l.v)}</td><td class="small">${fdmy(l.ing)}${l.prov?' · '+esc(l.prov):''}${l.fac?' · Fact. '+esc(l.fac):''}</td><td class="n">${fmtU(p,l.c)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Ese lote no figura en el inventario.</p>'}
+    <h3>Ventas</h3>${r.ventas.length?`<div class="scroll"><table><thead><tr><th>Fecha</th><th>Factura</th><th>Cliente</th><th>Producto</th><th class="n">Cantidad</th></tr></thead><tbody>${r.ventas.map(([v,i,c])=>`<tr><td>${fdate(v.fecha)}</td><td>${esc(v.nro)}${v.anulada?' <span class="pill e-ausente">Anulada</span>':''}</td><td>${esc(v.cli.n)}${v.cli.ruc?' · '+esc(v.cli.ruc):''}${v.rec&&v.rec.pac?'<div class="small muted">Paciente: '+esc(v.rec.pac)+'</div>':''}</td><td>${esc(i.n)}</td><td class="n">${c} ${esc(plu(i.uv||'unidad'))}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">No hay ventas de ese lote.</p>'}`}</div>`;
+}
+async function buscarTraz(l){
+  l=l.trim();if(!l)return;S.inv.tz={l,cargando:1};draw();
+  const lotes=[];prods().concat(Object.entries(D.productos).map(([id,p])=>Object.assign({id},p)).filter(p=>p.activo===false)).forEach(p=>Object.values(p.lotes||{}).forEach(x=>{if(norm(x.l)===norm(l))lotes.push([p,x])}));
+  const ventas=[];
+  try{const s=await col('ventas').where('lotesV','array-contains',l).limit(500).get();s.forEach(d=>{const v=d.data();if(!v.stock)return;v.items.forEach(i=>(i.lotes||[]).forEach(x=>{if(x.l===l)ventas.push([v,i,x.c])}))})}catch(e){werr(e)}
+  ventas.sort((a,b)=>b[0].t-a[0].t);S.inv.tz={l,lotes,ventas};if(S.view==='inventario')draw();
+}
+
+/* ---------- FARMACIA: VENTAS Y FACTURACIÓN ---------- */
+const vloaded={};
+function ensureVentas(m){
+  if(!m||m+'-31'>=DESDE&&m+'-01'>=DESDE||vloaded[m])return;vloaded[m]=1;
+  col('ventas').where('fecha','>=',m+'-01').where('fecha','<=',m+'-31').get().then(s=>{s.forEach(d=>{if(d.data().fecha<DESDE)VOLD[d.id]=D.ventas[d.id]=d.data()});render()}).catch(()=>{vloaded[m]=0});
+}
+const ventasL=()=>Object.entries(D.ventas).map(([id,v])=>Object.assign({id},v));
+const facOk=()=>{const f=cfFac(),h=hoy();return !!(f.timbrado&&f.ruc&&f.razon&&f.vdesde&&f.vhasta&&f.vdesde<=h&&f.vhasta>=h)};
+const nroFac=(f,n)=>(f.est||'001')+'-'+(f.pto||'001')+'-'+String(n).padStart(7,'0');
+function vPos(){
+  const tabs=[['nueva','Nueva venta'],['dia','Ventas del día'],['cxc','Cuentas por cobrar'],['rec','Libro de recetas']].concat(admin()?[['cfg','Configuración']]:[]);if(!tabs.some(x=>x[0]===S.pos.tab))S.pos.tab='nueva';const t=S.pos.tab;
+  return `<div class="vh"><h1>Ventas</h1></div>
+  <div class="scroll"><div class="seg">${tabs.map(([k,l])=>`<button class="btn" data-a="postab" data-v="${k}" aria-pressed="${t===k}">${l}</button>`).join('')}</div></div>
+  ${({nueva:posNueva,dia:posDia,cxc:posCxc,rec:posRec,cfg:posCfg})[t]()}`;
+}
+function posNueva(){
+  const c=posCalc(),f=S.pos.f,a=alertasInv();
+  const banner=!facOk()?`<div class="alert y"><b>Facturación</b>${cfFac().timbrado&&cfFac().vhasta<hoy()?'El timbrado está vencido.':'Falta configurar el timbrado y los datos de facturación.'} ${admin()?'Cargalos en Ventas → Configuración.':'Pedile al administrador que los cargue.'} Sin eso no se puede facturar.</div>`:'';
+  return `${banner}${a.frio&&c.items.some(i=>i.frio)?`<div class="alert y"><b>Cadena de frío</b>${esc(a.frio)}</div>`:''}<div class="pos">
+  <div class="col">
+    <div class="panel"><h2>Buscar producto</h2><input type="search" id="posq" data-i="posq" value="${esc(S.pos.q)}" placeholder="Nombre, principio activo o código de barras" aria-label="Buscar producto" autocomplete="off"><div id="posres">${posRes()}</div></div>
+    <div class="panel"><div class="vh"><h2>Detalle de la venta</h2>${c.items.length?'<button class="btn s" data-a="posclr">Vaciar</button>':''}</div>${posCart(c)}</div>
+  </div>
+  <div class="col">
+    <div class="panel"><h2>Cliente y pago</h2>${posDatos(c)}</div>
+    ${c.ctrl||c.rx?`<div class="panel"><h2>Receta</h2>${posReceta(c)}</div>`:''}
+    <div class="panel" id="postot">${posTot(c)}</div>
+  </div></div>`;
+}
+function posRes(){
+  const n=norm(S.pos.q);if(n.length<2)return '<p class="small muted">Escribí al menos 2 letras. Al buscar por principio activo aparecen todas las marcas.</p>';
+  const ps=prods().filter(p=>norm([p.nombre,p.mono,p.lab,p.codigo].join(' ')).includes(n)).slice(0,12);
+  if(!ps.length)return '<p class="muted">Sin resultados.</p>';
+  return `<div class="res">${ps.map(p=>{const d=dispU(p),ls=lotesOf(p).filter(l=>l.v>=hoy()),venc=stockU(p)-d;
+    const alt=d?[]:prods().filter(q=>q.id!==p.id&&p.mono&&norm(q.mono)===norm(p.mono)&&dispU(q)>0).slice(0,4);
+    return `<div class="ri"><div class="grow"><b>${esc(p.nombre)}</b>${p.frio?' <span class="pill frio">Frío</span>':''} <span class="pill ${TIPC[p.tipo]}">${TIPOS[p.tipo]}</span>
+      <div class="small muted">${esc([p.mono,p.lab].filter(Boolean).join(' · '))}</div>
+      <div class="small">${d?`Disponible: <b>${fmtU(p,d)}</b> · ${gs(p.pcaja)} ${esc((p.ucompra||'caja').toLowerCase())}${p.fracc&&xc(p)>1?' · '+gs(pU(p))+' '+esc((p.uventa||'unidad').toLowerCase()):''}${ls.length?' · vence '+semPill(ls[0].v):''}`:`<b class="bad">Sin stock disponible</b>${venc?' (hay '+fmtU(p,venc)+' vencido, bloqueado)':''}`}</div>
+      ${alt.length?`<div class="small">Alternativas con ${esc(p.mono)}: ${alt.map(q=>`<button class="lnk" data-a="posalt" data-q="${esc(q.nombre)}">${esc(q.nombre)}</button>`).join(', ')}</div>`:''}</div>
+      ${d?`<div class="row"><button class="btn s p" data-a="posadd" data-id="${p.id}" data-m="caja">+ ${esc(p.ucompra||'Caja')}</button>${p.fracc&&xc(p)>1?`<button class="btn s" data-a="posadd" data-id="${p.id}" data-m="unidad">+ ${esc(p.uventa||'Unidad')}</button>`:''}</div>`:''}</div>`}).join('')}</div>`;
+}
+function posCalc(){
+  const work={},items=[];let ok=true;
+  S.pos.it.forEach(it=>{
+    const p=D.productos[it.pid];if(!p)return;
+    const w=work[it.pid]||(work[it.pid]=clone(p)),u=(it.modo==='unidad'?1:xc(p))*it.cant,al=alloc(w,u);
+    if(al)al.forEach(a=>{w.lotes[a.lid].c-=a.c});else ok=false;
+    const pr=it.modo==='unidad'?pU(p):(+p.pcaja||0);
+    items.push({k:it.k,pid:it.pid,n:p.nombre+(it.modo==='unidad'&&xc(p)>1?' ('+(p.uventa||'unidad').toLowerCase()+')':''),mono:p.mono||'',tipo:p.tipo,frio:!!p.frio,modo:it.modo,cant:it.cant,u,uv:xc(p)>1?(p.uventa||'unidad'):(p.ucompra||'caja'),precio:pr,iva:+(p.iva??5),tot:pr*it.cant,lotes:al,disp:dispU(p)});
+  });
+  const total=items.reduce((s,i)=>s+i.tot,0),f=S.pos.f,seg=f.seg?segs().find(s=>s.n===f.seg)||null:null,pct=seg?Math.min(100,Math.max(0,+f.pct||0)):0,aseg=Math.round(total*pct/100);
+  return {items,ok,total,seg,pct,aseg,pac:total-aseg,ctrl:items.some(i=>i.tipo==='controlado'),rx:items.some(i=>i.tipo==='receta')};
+}
+function posCart(c){
+  if(!c.items.length)return '<p class="muted">Agregá productos desde la búsqueda.</p>';
+  return `<div class="scroll"><table class="cart"><thead><tr><th>Producto</th><th>Cantidad</th><th class="n">Precio</th><th class="n">Subtotal</th><th></th></tr></thead><tbody>${c.items.map(i=>{const p=D.productos[i.pid];return `<tr><td><b>${esc(p.nombre)}</b>${i.frio?' <span class="pill frio">Frío</span>':''}${i.tipo==='controlado'?' <span class="pill e-ausente">Receta archivada</span>':i.tipo==='receta'?' <span class="pill e-pendiente">Bajo receta</span>':''}
+    <div class="small ${i.lotes?'muted':'bad'}">${i.lotes?'Lote '+i.lotes.map(l=>esc(l.l)+' (vence '+fdmy(l.v)+')').join(', '):'Stock insuficiente: hay '+fmtU(p,i.disp)}</div></td>
+    <td><div class="row" style="flex-wrap:nowrap"><input type="number" min="1" step="1" value="${i.cant}" data-c="posc" data-k="${i.k}" aria-label="Cantidad" style="width:70px">${p.fracc&&xc(p)>1?`<select data-c="posm" data-k="${i.k}" aria-label="Unidad"><option value="caja" ${i.modo==='caja'?'selected':''}>${esc(p.ucompra||'Caja')}</option><option value="unidad" ${i.modo==='unidad'?'selected':''}>${esc(p.uventa||'Unidad')}</option></select>`:`<span class="small muted">${esc((i.modo==='unidad'?p.uventa:p.ucompra)||'')}</span>`}</div></td>
+    <td class="n" style="white-space:nowrap">${gs(i.precio)}<div class="small muted">IVA ${i.iva?i.iva+' %':'exenta'}</div></td><td class="n" style="white-space:nowrap"><b>${gs(i.tot)}</b></td><td><button class="btn s d" data-a="posdel" data-k="${i.k}" aria-label="Quitar">✕</button></td></tr>`}).join('')}</tbody></table></div>`;
+}
+const fv=(k,d)=>esc(S.pos.f[k]??d??'');
+function posDatos(c){
+  const f=S.pos.f;
+  return `<div class="form">
+  <label class="full">Cliente / Razón social<input list="pacdl" name="cli" data-c="pf" value="${fv('cli')}" placeholder="Sin nombre"></label><datalist id="pacdl">${pacList().slice(0,800).map(p=>`<option value="${esc(p.nombre)}">`).join('')}</datalist>
+  <label>RUC o CI<input name="ruc" data-c="pf" value="${fv('ruc')}" placeholder="44444401-7"></label>
+  <label>Condición de venta<select name="cond" data-c="pf" data-r="1"><option value="contado">Contado</option><option value="credito" ${f.cond==='credito'?'selected':''}>Crédito (convenio)</option></select></label>
+  ${f.cond!=='credito'?`<label>Medio de pago<select name="medio" data-c="pf">${Object.entries(MEDIOS).map(([k,v])=>`<option value="${k}" ${f.medio===k?'selected':''}>${v}</option>`).join('')}</select></label>`:'<p class="small muted" style="align-self:end">La factura a crédito queda en Cuentas por cobrar a nombre del cliente.</p>'}
+  <label>Seguro médico<select name="seg" data-c="pf" data-r="1"><option value="">Sin seguro</option>${segs().map(s=>`<option value="${esc(s.n)}" ${f.seg===s.n?'selected':''}>${esc(s.n)}</option>`).join('')}</select></label>
+  ${f.seg?`<label>Cobertura del seguro (%)<input type="number" name="pct" data-c="pf" data-r="1" min="0" max="100" step="any" value="${fv('pct')}"></label>`:''}
+  </div>`;
+}
+function posReceta(c){
+  const f=S.pos.f;
+  return `${c.ctrl?`<p class="small muted">Hay medicamentos de <b>receta archivada</b>. Los datos son obligatorios y quedan en el Libro de recetas.</p>`:`<p class="small muted">Hay medicamentos de venta bajo receta.</p>`}
+  <div class="form">
+  ${c.ctrl?`<label class="full">Médico que prescribe${Object.keys(D.medicos).length?` <select name="rmid" data-c="pf" data-r="1"><option value="">Elegir del consultorio o escribir abajo</option>${Object.entries(D.medicos).map(([id,m])=>`<option value="${id}" ${f.rmid===id?'selected':''}>${esc(m.nombre)}</option>`).join('')}</select>`:''}</label>
+  <label>Nombre del médico<input name="rmed" data-c="pf" value="${fv('rmed')}"></label><label>Registro profesional N°<input name="rreg" data-c="pf" value="${fv('rreg')}"></label>
+  <label>Paciente<input name="rpac" data-c="pf" list="pacdl" value="${fv('rpac')}"></label><label>CI del paciente<input name="rci" data-c="pf" value="${fv('rci')}"></label>
+  <label>Receta N°<input name="rnro" data-c="pf" value="${fv('rnro')}"></label><label>Fecha de la receta<input type="date" name="rfec" data-c="pf" value="${fv('rfec',hoy())}" max="${hoy()}"></label>`:''}
+  ${c.rx?`<label class="full chk"><input type="checkbox" name="rok" data-c="pf" ${f.rok?'checked':''}> Verifiqué la receta médica de los productos de venta bajo receta</label>`:''}
+  </div>`;
+}
+function ivaSum(items){let ex=0,g5=0,g10=0;items.forEach(i=>{if(i.iva===10)g10+=i.tot;else if(i.iva===5)g5+=i.tot;else ex+=i.tot});return {ex,g5,g10,iva5:Math.round(g5/21),iva10:Math.round(g10/11)}}
+function posTot(c){
+  const s=ivaSum(c.items),f=S.pos.f;
+  return `<div class="tot"><div><span>Exentas</span><b>${gs(s.ex)}</b></div><div><span>Gravadas 5 %</span><b>${gs(s.g5)}</b></div><div><span>Gravadas 10 %</span><b>${gs(s.g10)}</b></div>
+  <div><span>IVA incluido</span><b>${gs(s.iva5+s.iva10)}</b></div><div class="big"><span>Total</span><b>${gs(c.total)}</b></div>
+  ${c.seg&&c.pct?`<div><span>Cubre ${esc(c.seg.n)} (${c.pct} %)</span><b>${gs(c.aseg)}</b></div><div class="big"><span>${f.cond==='credito'?'A crédito del cliente':'Paga el paciente'}</span><b>${gs(c.pac)}</b></div>`:''}</div>
+  ${c.seg&&c.pct?`<p class="small muted">Se emiten ${c.pac&&c.aseg?'dos facturas: una al paciente por su parte y otra a crédito a '+esc(c.seg.n)+' por la cobertura':c.aseg?'una factura a crédito a '+esc(c.seg.n):'una factura al paciente'}.</p>`:''}
+  <button class="btn p big" data-a="vender" ${c.items.length&&c.ok&&facOk()?'':'disabled'}>${f.cond==='credito'?'Facturar a crédito':'Cobrar y facturar'}</button>`;
+}
+function partir(items,monto,total){
+  if(monto===total)return clone(items);
+  let acc=0;const r=items.map((i,k)=>{const x=clone(i);x.tot=k===items.length-1?monto-acc:Math.round(i.tot*monto/total);acc+=x.tot;x.precio=Math.round(x.tot/x.cant);return x});return r;
+}
+async function vender(btn){
+  const c=posCalc(),f=S.pos.f,fac=cfFac();
+  if(!c.items.length)return;
+  if(!facOk()){toast('Configurá un timbrado vigente antes de facturar.',1);return}
+  if(!c.ok){toast('Hay productos sin stock suficiente.',1);return}
+  if(c.ctrl&&!(f.rmed&&f.rreg&&f.rpac&&f.rci&&f.rnro)){toast('Completá médico, registro profesional, paciente, CI y número de receta.',1);return}
+  if(c.rx&&!f.rok){toast('Marcá que verificaste la receta médica.',1);return}
+  if(f.cond==='credito'&&!(f.cli&&f.ruc)){toast('Para vender a crédito cargá el nombre y RUC del cliente.',1);return}
+  btn.disabled=true;
+  const cli={n:(f.cli||'').trim()||'SIN NOMBRE',ruc:(f.ruc||'').trim()||'44444401-7'};
+  const rec=c.ctrl?{med:f.rmed.trim(),reg:f.rreg.trim(),pac:f.rpac.trim(),ci:f.rci.trim(),nro:f.rnro.trim(),fec:f.rfec||hoy(),arch:true}:(c.rx?{ver:true}:null);
+  const facSnap={razon:fac.razon,ruc:fac.ruc,dir:fac.dir||'',tel:fac.tel||'',act:fac.act||'',timbrado:fac.timbrado,vdesde:fac.vdesde,vhasta:fac.vhasta,est:fac.est||'001',pto:fac.pto||'001',tipoDoc:fac.tipoDoc||'Autoimpreso',formato:fac.formato||'ticket'};
+  const g=nid(),now=Date.now(),hd=hoy(),cref=col('contadores').doc('factura');
+  try{
+    const out=await fs.runTransaction(async tx=>{
+      const cs=await tx.get(cref),ps={};
+      for(const pid of [...new Set(c.items.map(i=>i.pid))]){const s=await tx.get(col('productos').doc(pid));if(!s.exists)throw{code:'stock'};ps[pid]=s.data()}
+      const items=[];
+      for(const it of c.items){const al=alloc(ps[it.pid],it.u);if(!al)throw{code:'stock',n:it.n};al.forEach(a=>{ps[it.pid].lotes[a.lid].c-=a.c});items.push(Object.assign({},it,{lotes:al.map(a=>({lid:a.lid,l:a.l,v:a.v,c:a.c}))}))}
+      const cd=cs.exists?cs.data():{};let n=cd.timbrado===fac.timbrado&&cd.n?cd.n:(+fac.desde||1);
+      const docs=[],base={fecha:hd,t:now,grupo:g,uid:ME.uid,un:UDOC.nombre||uName(UDOC),fac:facSnap,anulada:false,rec,lotesV:[...new Set(items.flatMap(i=>i.lotes.map(l=>l.l)))]};
+      const mk=(parte,cliente,cond,monto,stock)=>{const its=partir(items,monto,c.total).map(i=>({pid:i.pid,n:i.n,mono:i.mono,tipo:i.tipo,modo:i.modo,cant:i.cant,u:i.u,uv:i.uv,precio:i.precio,iva:i.iva,tot:i.tot,lotes:i.lotes}));const s=ivaSum(its);
+        const v=Object.assign({},base,{num:n,nro:nroFac(facSnap,n),parte,cli:cliente,cond,medio:cond==='contado'?(f.medio||'efectivo'):'',items:its,total:monto},s,{seg:c.seg&&c.pct?{n:c.seg.n,pct:c.pct,aseg:c.aseg,pac:c.pac}:null,cobrado:cond==='contado',stock});n++;docs.push(v)};
+      if(c.seg&&c.pct){
+        if(c.pac>0)mk('paciente',cli,f.cond==='credito'?'credito':'contado',c.pac,true);
+        if(c.aseg>0)mk('aseguradora',{n:c.seg.n,ruc:c.seg.ruc||''},'credito',c.aseg,c.pac<=0);
+      }else mk(null,cli,f.cond==='credito'?'credito':'contado',c.total,true);
+      for(const pid in ps)tx.update(col('productos').doc(pid),{lotes:ps[pid].lotes});
+      const ids=docs.map(v=>{const r=col('ventas').doc();tx.set(r,v);return r.id});
+      items.forEach(i=>i.lotes.forEach(l=>tx.set(col('movs').doc(),{t:now,tipo:'venta',pid:i.pid,n:i.n,l:l.l,c:-l.c,ref:docs[0].nro,uid:ME.uid})));
+      tx.set(cref,{timbrado:fac.timbrado,n});
+      return docs.map((v,k)=>Object.assign({id:ids[k]},v));
+    });
+    out.forEach(v=>{D.ventas[v.id]=v});
+    log('Registró venta',out.map(v=>v.nro).join(' y ')+' · '+gsn(c.total));
+    S.pos.it=[];S.pos.q='';S.pos.f={cond:'contado',medio:'efectivo'};draw();
+    modal(`<h2>Venta registrada</h2><div class="kv">${out.map(v=>`<div><span>Factura ${v.parte==='aseguradora'?'a '+esc(v.cli.n):v.parte==='paciente'?'al paciente':''}</span>${esc(v.nro)} · ${gs(v.total)}</div>`).join('')}</div>
+    <div class="row">${out.map(v=>`<button class="btn p" data-a="facpdf" data-id="${v.id}">Imprimir ${esc(v.nro)}</button>`).join('')}<button class="btn" data-a="close">Cerrar</button></div>`);
+    facPdf(out[0]);
+  }catch(e){btn.disabled=false;if(e&&e.code==='stock'){toast('El stock cambió mientras vendías'+(e.n?' ('+e.n+')':'')+'. Revisá las cantidades.',1);draw()}else werr(e)}
+}
+function letras(n){
+  n=Math.round(Math.abs(n));if(!n)return 'cero';
+  const U=['','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve','veinte','veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve'],
+    DD=['','','','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'],CC=['','ciento','doscientos','trescientos','cuatrocientos','quinientos','seiscientos','setecientos','ochocientos','novecientos'];
+  const c99=x=>x<30?U[x]:DD[Math.floor(x/10)]+(x%10?' y '+U[x%10]:''),c999=x=>x===100?'cien':(CC[Math.floor(x/100)]+(x%100?' '+c99(x%100):'')).trim(),ap=s=>s.replace(/veintiuno$/,'veintiún').replace(/uno$/,'un');
+  const mm=Math.floor(n/1e6),mi=Math.floor(n%1e6/1e3),r=n%1e3,o=[];
+  if(mm)o.push(mm===1?'un millón':ap(c999(mm))+' millones');if(mi)o.push(mi===1?'mil':ap(c999(mi))+' mil');if(r)o.push(c999(r));return o.join(' ');
+}
+function facPdf(v){
+  const J=window.jspdf&&window.jspdf.jsPDF;if(!J){toast('No se pudo cargar el generador de PDF. Revisá la conexión.',1);return}
+  const f=v.fac||cfFac(),tk=f.formato!=='a4',W=tk?80:210,m=tk?4:15,R=W-m,mon=cfg().moneda||'Gs.';
+  const build=H=>{
+  const d=new J({unit:'mm',format:[W,H]}),fs1=tk?7.5:9,lh=tk?3.4:4.6;let y=m+4;
+  const C=(s,yy,b,sz)=>{d.setFont('helvetica',b?'bold':'normal');d.setFontSize(sz||fs1);const t=d.splitTextToSize(String(s),W-2*m);d.text(t,tk?W/2:m,yy,{align:tk?'center':'left'});return t.length*(sz?sz*0.42:lh)};
+  const LR=(a,b,yy,bo)=>{d.setFont('helvetica',bo?'bold':'normal');d.text(String(a),m,yy);d.text(String(b),R,yy,{align:'right'})};
+  y+=C(f.razon||'',y,1,tk?10:14);
+  [f.act,f.dir,f.tel&&'Tel. '+f.tel].filter(Boolean).forEach(s=>{y+=C(s,y)});
+  y+=C('RUC: '+(f.ruc||''),y,1);y+=C('Timbrado N° '+(f.timbrado||'')+' · Vigencia '+fdmy(f.vdesde)+' al '+fdmy(f.vhasta),y);y+=2;
+  y+=C('FACTURA'+(f.tipoDoc?' ('+String(f.tipoDoc).toLowerCase()+')':''),y,1,tk?10:13);y+=C('N° '+v.nro,y,1,tk?9:11);y+=1;
+  d.setFontSize(fs1);d.setDrawColor(120);d.line(m,y,R,y);y+=lh+0.6;
+  LR('Fecha: '+new Date(v.t).toLocaleString('es',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}),'Condición: '+(v.cond==='credito'?'Crédito':'Contado'),y);y+=lh;
+  d.setFont('helvetica','normal');let t=d.splitTextToSize('Cliente: '+v.cli.n,W-2*m);d.text(t,m,y);y+=t.length*lh;d.text('RUC/CI: '+(v.cli.ruc||''),m,y);y+=lh;
+  if(v.parte==='aseguradora'&&v.seg){t=d.splitTextToSize('Cobertura '+v.seg.pct+' % de la venta'+(v.rec&&v.rec.pac?' del paciente '+v.rec.pac:''),W-2*m);d.text(t,m,y);y+=t.length*lh}
+  d.line(m,y,R,y);y+=lh;
+  if(tk){
+    d.setFont('helvetica','bold');LR('Cant. Descripción','Total',y,1);y+=lh;
+    v.items.forEach(i=>{d.setFont('helvetica','normal');t=d.splitTextToSize(i.cant+' x '+i.n,W-2*m-4);d.text(t,m,y);y+=t.length*lh;LR('  '+gsn(i.precio)+' c/u · IVA '+(i.iva?i.iva+'%':'exenta'),gsn(i.tot),y);y+=lh+0.8});
+  }else{
+    const X={c:m,d:m+16,p:R-78,e:R-52,a:R-26,b:R};
+    d.setFont('helvetica','bold');d.text('Cant.',X.c,y);d.text('Descripción',X.d,y);d.text('Precio unit.',X.p,y,{align:'right'});d.text('Exentas',X.e,y,{align:'right'});d.text('5 %',X.a,y,{align:'right'});d.text('10 %',X.b,y,{align:'right'});y+=lh+1;d.setFont('helvetica','normal');
+    v.items.forEach(i=>{t=d.splitTextToSize(i.n,X.p-X.d-24);d.text(String(i.cant),X.c,y);d.text(t,X.d,y);d.text(gsn(i.precio),X.p,y,{align:'right'});d.text(i.iva===0?gsn(i.tot):'',X.e,y,{align:'right'});d.text(i.iva===5?gsn(i.tot):'',X.a,y,{align:'right'});d.text(i.iva===10?gsn(i.tot):'',X.b,y,{align:'right'});y+=t.length*lh+1.5});
+    d.line(m,y,R,y);y+=lh;d.text('Subtotales',X.d,y);d.text(gsn(v.ex),X.e,y,{align:'right'});d.text(gsn(v.g5),X.a,y,{align:'right'});d.text(gsn(v.g10),X.b,y,{align:'right'});y+=lh;
+  }
+  d.line(m,y,R,y);y+=lh+0.6;d.setFontSize(tk?9:11);LR('TOTAL '+mon,gsn(v.total),y,1);y+=lh+1.4;d.setFontSize(fs1);
+  t=d.splitTextToSize('Son '+mon+' '+letras(v.total)+'.',W-2*m);d.setFont('helvetica','normal');d.text(t,m,y);y+=t.length*lh+1;
+  if(tk){LR('Gravadas 5 %',gsn(v.g5),y);y+=lh;LR('Gravadas 10 %',gsn(v.g10),y);y+=lh;LR('Exentas',gsn(v.ex),y);y+=lh}
+  d.setFont('helvetica','bold');d.text('Liquidación del IVA',m,y);y+=lh;d.setFont('helvetica','normal');LR('IVA 5 %: '+gsn(v.iva5)+'   IVA 10 %: '+gsn(v.iva10),'Total IVA: '+gsn(v.iva5+v.iva10),y);y+=lh+1;
+  if(v.seg&&v.parte==='paciente'){t=d.splitTextToSize(v.seg.n+' cubre '+v.seg.pct+' % ('+gsn(v.seg.aseg)+'), facturado aparte a la aseguradora.',W-2*m);d.text(t,m,y);y+=t.length*lh+1}
+  if(v.rec&&v.rec.arch){t=d.splitTextToSize('Receta N° '+v.rec.nro+' del '+fdmy(v.rec.fec)+' · Médico: '+v.rec.med+' · Reg. Prof. '+v.rec.reg+' · Paciente '+v.rec.pac+' CI '+v.rec.ci,W-2*m);d.text(t,m,y);y+=t.length*lh+1}
+  if(v.anulada){d.setTextColor(200,0,0);d.setFont('helvetica','bold');d.setFontSize(tk?14:28);d.text('ANULADA',W/2,tk?y+4:150,{align:'center'});d.setTextColor(0)}
+  d.setFont('helvetica','normal');d.setFontSize(fs1-0.5);y+=1;d.text('Original: Cliente',W/2,y,{align:'center'});
+  return [d,y]};
+  let [d,y]=build(tk?600:297);if(tk)d=build(Math.max(90,y+m+4))[0];
+  const w=window.open(d.output('bloburl'),'_blank');if(!w)d.save('Factura '+v.nro+'.pdf');
+}
+function posDia(){
+  const f=S.pos.dia;ensureVentas(f.slice(0,7));
+  const vs=ventasL().filter(v=>v.fecha===f).sort((a,b)=>b.t-a.t),ok=vs.filter(v=>!v.anulada);
+  const por={};ok.filter(v=>v.cond==='contado').forEach(v=>{por[v.medio]=(por[v.medio]||0)+v.total});
+  const cred=ok.filter(v=>v.cond==='credito').reduce((s,v)=>s+v.total,0);
+  return `<div class="row"><input type="date" id="posdia" data-c="posdia" value="${f}" aria-label="Fecha"></div>
+  <div class="stats">${Object.entries(MEDIOS).map(([k,l])=>`<div class="stat"><b>${gs(por[k]||0)}</b><span>Contado · ${l}</span></div>`).join('')}<div class="stat"><b>${gs(cred)}</b><span>A crédito</span></div></div>
+  <div class="panel"><h2>Facturas del ${esc(fdate(f))}</h2>${vs.length?`<div class="scroll"><table><thead><tr><th>Hora</th><th>Factura</th><th>Cliente</th><th>Condición</th><th class="n">Total</th><th></th></tr></thead><tbody>${vs.map(v=>`<tr><td>${new Date(v.t).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</td><td>${esc(v.nro)}${v.anulada?' <span class="pill e-ausente">Anulada</span>':''}</td><td>${esc(v.cli.n)}<div class="small muted">${esc([v.cli.ruc,v.seg?v.seg.n+' '+v.seg.pct+' %':''].filter(Boolean).join(' · '))}</div></td><td>${v.cond==='credito'?'Crédito':'Contado · '+(MEDIOS[v.medio]||'')}</td><td class="n" style="white-space:nowrap">${gs(v.total)}</td><td><div class="row"><button class="btn s" data-a="facpdf" data-id="${v.id}">Imprimir</button>${admin()&&!v.anulada?`<button class="btn s d" data-a="anular" data-id="${v.id}" data-confirm="Confirmar anulación">Anular</button>`:''}</div></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">No hay ventas en esta fecha.</p>'}</div>`;
+}
+async function anular(id){
+  const v=D.ventas[id];if(!v)return;
+  const grupo=ventasL().filter(x=>x.grupo===v.grupo&&!x.anulada),st=grupo.find(x=>x.stock),now=Date.now();
+  try{
+    const b=fs.batch();
+    grupo.forEach(x=>b.update(col('ventas').doc(x.id),{anulada:true,anuladaPor:UDOC.nombre||uName(UDOC),anuladaT:now}));
+    if(st)st.items.forEach(i=>(i.lotes||[]).forEach(l=>{b.update(col('productos').doc(i.pid),{['lotes.'+l.lid+'.c']:firebase.firestore.FieldValue.increment(l.c)});b.set(col('movs').doc(),{t:now,tipo:'anulación',pid:i.pid,n:i.n,l:l.l,c:l.c,ref:st.nro,uid:ME.uid})}));
+    await b.commit();grupo.forEach(x=>{D.ventas[x.id].anulada=true});log('Anuló venta',grupo.map(x=>x.nro).join(' y '));toast('Venta anulada y stock devuelto');draw();
+  }catch(e){werr(e)}
+}
+function posCxc(){
+  const vs=ventasL().filter(v=>v.cond==='credito'&&!v.anulada&&!v.cobrado).sort((a,b)=>a.t-b.t),g={};
+  vs.forEach(v=>(g[v.cli.n]=g[v.cli.n]||[]).push(v));
+  return `<p class="muted">Facturas a crédito pendientes de cobro (convenios, seguros y clientes) de los últimos meses.</p>${vs.length?Object.entries(g).map(([n,l])=>`<div class="panel"><div class="vh"><h2>${esc(n)}</h2><b>${gs(l.reduce((s,v)=>s+v.total,0))}</b></div><div class="scroll"><table><thead><tr><th>Fecha</th><th>Factura</th><th>Detalle</th><th class="n">Monto</th><th></th></tr></thead><tbody>${l.map(v=>`<tr><td>${fdate(v.fecha)}</td><td>${esc(v.nro)}</td><td class="small">${v.parte==='aseguradora'?'Cobertura '+v.seg.pct+' %'+(v.rec&&v.rec.pac?' · '+esc(v.rec.pac):''):esc(v.items.map(i=>i.n).join(', ')).slice(0,90)}</td><td class="n" style="white-space:nowrap">${gs(v.total)}</td><td><div class="row"><button class="btn s" data-a="facpdf" data-id="${v.id}">Ver</button><button class="btn s p" data-a="cobrar" data-id="${v.id}" data-confirm="Confirmar cobro">Marcar cobrada</button></div></td></tr>`).join('')}</tbody></table></div></div>`).join(''):'<div class="panel"><p class="muted">No hay cuentas pendientes de cobro.</p></div>'}`;
+}
+function recRows(m){return ventasL().filter(v=>v.fecha.startsWith(m)&&v.rec&&v.rec.arch&&v.stock&&!v.anulada).sort((a,b)=>a.t-b.t).flatMap(v=>v.items.filter(i=>i.tipo==='controlado').map(i=>[v,i]))}
+function posRec(){
+  const m=S.pos.mes;ensureVentas(m);const r=recRows(m);
+  return `<div class="panel"><div class="vh"><h2>Libro de recetas archivadas</h2><div class="row"><input type="month" id="posmes" data-c="posmes" value="${m}" aria-label="Mes"><button class="btn" data-a="reccsv">Exportar CSV</button></div></div>
+  <p class="small muted">Medicamentos controlados y psicotrópicos vendidos, con los datos de la receta. Archivá la receta física con el número de factura.</p>
+  ${r.length?`<div class="scroll"><table><thead><tr><th>Fecha</th><th>Factura</th><th>Producto</th><th>Lote</th><th class="n">Cant.</th><th>Médico</th><th>Paciente</th><th>Receta</th></tr></thead><tbody>${r.map(([v,i])=>`<tr><td>${fdate(v.fecha)}</td><td>${esc(v.nro)}</td><td>${esc(i.n)}</td><td>${esc((i.lotes||[]).map(l=>l.l).join(', '))}</td><td class="n">${i.cant}</td><td>${esc(v.rec.med)}<div class="small muted">Reg. ${esc(v.rec.reg)}</div></td><td>${esc(v.rec.pac)}<div class="small muted">CI ${esc(v.rec.ci)}</div></td><td>N° ${esc(v.rec.nro)}<div class="small muted">${fdmy(v.rec.fec)}</div></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">No hay ventas de controlados en este mes.</p>'}</div>`;
+}
+function posCfg(){
+  const f=cfFac(),fa=cfF(),cn=(D.contadores.factura||{}),prox=cn.timbrado===f.timbrado&&cn.n?cn.n:(+f.desde||1);
+  return `<div class="panel"><h2>Facturación</h2><form data-s="fac" class="form">
+  <label>Razón social<input name="razon" id="fc_razon" required value="${esc(f.razon||cfg().nombre||'')}"></label><label>RUC<input name="ruc" id="fc_ruc" required value="${esc(f.ruc||cfg().ruc||'')}"></label>
+  <label>Actividad económica<input name="act" id="fc_act" value="${esc(f.act||'')}" placeholder="Ej.: Venta de productos farmacéuticos"></label><label>Dirección<input name="dir" id="fc_dir" value="${esc(f.dir||cfg().direccion||'')}"></label><label>Teléfono<input name="tel" id="fc_tel" value="${esc(f.tel||cfg().telefono||'')}"></label>
+  <label>Timbrado N°<input name="timbrado" id="fc_timb" required inputmode="numeric" value="${esc(f.timbrado||'')}"></label><label>Vigencia desde<input type="date" name="vdesde" id="fc_vd" required value="${esc(f.vdesde||'')}"></label><label>Vigencia hasta<input type="date" name="vhasta" id="fc_vh" required value="${esc(f.vhasta||'')}"></label>
+  <label>Establecimiento<input name="est" id="fc_est" required pattern="\\d{3}" value="${esc(f.est||'001')}"></label><label>Punto de expedición<input name="pto" id="fc_pto" required pattern="\\d{3}" value="${esc(f.pto||'001')}"></label>
+  <label>Próxima factura N°<input type="number" name="desde" id="fc_desde" min="1" step="1" required value="${prox}"></label>
+  <label>Tipo de comprobante<select name="tipoDoc" id="fc_tipo">${['Autoimpreso','Preimpreso'].map(x=>`<option ${f.tipoDoc===x?'selected':''}>${x}</option>`).join('')}</select></label>
+  <label>Formato de impresión<select name="formato" id="fc_fmt"><option value="ticket">Ticket 80 mm</option><option value="a4" ${f.formato==='a4'?'selected':''}>Hoja A4</option></select></label>
+  <p class="full small muted">La numeración sigue sola a partir de la próxima factura. Al cambiar de timbrado, cargá el nuevo número, su vigencia y el número inicial. Factura electrónica (SIFEN): requiere certificado digital y un servicio que firme y envíe a la SET; queda preparada como siguiente etapa.</p>
+  <div class="full"><button class="btn p">Guardar facturación</button></div></form></div>
+  <div class="panel"><h2>Seguros y farmacia</h2><form data-s="farm" class="form">
+  <label class="full">Seguros médicos (uno por línea: Nombre ; % de cobertura ; RUC)<textarea name="seguros" id="fm_seg" rows="5">${esc(segs().map(s=>[s.n,s.pct,s.ruc||''].join(' ; ')).join('\n'))}</textarea></label>
+  <label>Aviso de vencimiento (días antes)<input type="number" name="alertaDias" id="fm_ad" min="1" step="1" value="${alertaD()}"></label>
+  <label>Heladera: temperatura mínima (°C)<input type="number" name="tmin" id="fm_tmin" step="0.1" value="${fa.tmin??2}"></label><label>Heladera: temperatura máxima (°C)<input type="number" name="tmax" id="fm_tmax" step="0.1" value="${fa.tmax??8}"></label>
+  <div class="full"><button class="btn p">Guardar</button></div></form></div>`;
+}
+function demoFarm(){
+  const h=hoy(),L=(l,dv,c)=>({['d'+l]:{l,v:addD(h,dv),c,ing:h,prov:'Distribuidora Ejemplo'}});
+  const P={
+    demo_p1:{nombre:'Paracetamol 500 mg x 20 comprimidos',mono:'Paracetamol',lab:'Laboratorio A',tipo:'libre',iva:5,ucompra:'Caja',uventa:'Comprimido',xcaja:20,fracc:true,pcaja:12000,minC:5,prov:'Distribuidora Ejemplo',lotes:Object.assign(L('PA2401',400,200),L('PA2390',45,40))},
+    demo_p2:{nombre:'Dolomax 500 mg x 10 comprimidos',mono:'Paracetamol',lab:'Laboratorio B',tipo:'libre',iva:5,ucompra:'Caja',uventa:'Blíster',xcaja:1,fracc:false,pcaja:9500,minC:3,prov:'Distribuidora Ejemplo',lotes:L('DM771',-10,6)},
+    demo_p3:{nombre:'Ibuprofeno 400 mg x 10 comprimidos',mono:'Ibuprofeno',lab:'Laboratorio A',tipo:'libre',iva:5,ucompra:'Caja',uventa:'Comprimido',xcaja:10,fracc:true,pcaja:8000,minC:10,prov:'Distribuidora Ejemplo',lotes:L('IB5520',300,30)},
+    demo_p4:{nombre:'Amoxicilina 500 mg x 21 cápsulas',mono:'Amoxicilina',lab:'Laboratorio C',tipo:'receta',iva:5,ucompra:'Caja',uventa:'Cápsula',xcaja:21,fracc:true,pcaja:35000,minC:4,prov:'Droguería Central',lotes:L('AM1102',200,84)},
+    demo_p5:{nombre:'Clonazepam 2 mg x 30 comprimidos',mono:'Clonazepam',lab:'Laboratorio B',tipo:'controlado',iva:5,ucompra:'Caja',uventa:'Comprimido',xcaja:30,fracc:false,pcaja:48000,minC:2,prov:'Droguería Central',lotes:L('CZ0099',500,150)},
+    demo_p6:{nombre:'Insulina NPH 100 UI/ml frasco 10 ml',mono:'Insulina humana',lab:'Laboratorio D',tipo:'receta',frio:true,iva:5,ucompra:'Frasco',uventa:'Frasco',xcaja:1,fracc:false,pcaja:95000,minC:3,prov:'Droguería Central',lotes:L('IN3300',60,2)},
+    demo_p7:{nombre:'Jeringa descartable 5 ml',mono:'',lab:'Insumos SA',tipo:'insumo',iva:10,ucompra:'Caja',uventa:'Unidad',xcaja:100,fracc:true,pcaja:90000,minC:1,prov:'Insumos SA',lotes:L('JR800',900,250)},
+    demo_p8:{nombre:'Guantes de látex talle M x 100',mono:'',lab:'Insumos SA',tipo:'insumo',iva:10,ucompra:'Caja',uventa:'Par',xcaja:50,fracc:true,pcaja:60000,minC:2,prov:'Insumos SA',lotes:L('GL120',700,40)}
+  };
+  Object.entries(P).forEach(([id,p])=>{if(!D.productos[id])write('productos',id,Object.assign(p,{demo:true,activo:true}),'set')});
+}
+
 /* ---------- AUDITORÍA ---------- */
 async function loadAud(){
   try{const s=await col('auditoria').orderBy('t','desc').limit(300).get();const r=[];s.forEach(d=>r.push(d.data()));S.aud=r}catch(e){S.aud=[]}
@@ -803,7 +1232,7 @@ function userForm(eid){
   const dev=MODE==='dev';
   modal(`<h2>Agregar usuario</h2><form data-s="user" class="form"><input type="hidden" name="eid" value="${eid||EID}">
     <label>Nombre y apellido<input name="nombre" id="u_nombre" required></label><label>Nombre de usuario (para ingresar)<input name="email" id="u_email" required pattern="[A-Za-z0-9._\\-]{3,30}" autocapitalize="none" spellcheck="false" placeholder="ej.: recepcion1"></label>
-    <label>Rol<select name="rol" id="u_rol"><option value="recepcion">Recepción</option><option value="medico">Médico</option><option value="admin" ${dev?'selected':''}>Administrador</option></select></label>
+    <label>Rol<select name="rol" id="u_rol"><option value="recepcion">Recepción</option><option value="medico">Médico</option><option value="farmacia">Farmacia (ventas e inventario)</option><option value="admin" ${dev?'selected':''}>Administrador</option></select></label>
     <label>Contraseña temporal<input name="pass" id="u_pass" required minlength="6" value="${tmpPass()}"></label>
     <p class="full small muted">Entregale el nombre de usuario y esta contraseña temporal. El sistema le pedirá cambiarla en su primer ingreso. Usuario: 3 a 30 letras o números, sin espacios.</p>
     <div class="full row"><button class="btn p">Crear usuario</button><button type="button" class="btn" data-a="close">Cancelar</button></div></form>`);
@@ -828,6 +1257,7 @@ const fileData=f=>new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.
 
 /* ---------- datos de ejemplo ---------- */
 function demo(){
+  demoFarm();
   const h=hoy(),mid='demo_med';
   if(!cfg().nombre)write('config','consultorio',{nombre:(EMP&&EMP.nombre)||'Consultorio de ejemplo',direccion:'Av. Principal 123',telefono:'021 000 000',ruc:'',hoja:'media',moneda:'Gs.',prefijo:'595'},'set');
   if(!Object.keys(D.medicos).length)write('medicos',mid,{nombre:'Dra. Ejemplo Médica',esp:'Clínica médica',reg:'00000',demo:true},'set');
@@ -844,6 +1274,7 @@ function demo(){
   T(addD(h,-1),[['09:00',3,'Control de asma','atendido',{e:'pagado',monto:150000,medio:'tarjeta'}],['10:00',4,'Consulta','atendido',{e:'debe',monto:150000}]]);
 }
 function delDemo(){
+  Object.entries(D.productos).forEach(([id,p])=>{if(p.demo)write('productos',id,null,'del')});
   Object.entries(D.pacientes).forEach(([id,p])=>{if(p.demo){write('pacientes',id,null,'del');write('clinico',id,null,'del')}});
   Object.entries(D.agenda).forEach(([f,d])=>Object.entries(d.turnos||{}).forEach(([id,t])=>{if(t.demo)delKey('agenda',f,'turnos',id)}));
   Object.entries(D.medicos).forEach(([id,m])=>{if(m.demo)write('medicos',id,null,'del')});
@@ -938,6 +1369,21 @@ function closeM(){const d=$('#dlg');if(d.open)d.close()}
 
 /* ---------- acciones ---------- */
 const A={
+  invtab(d){S.inv.tab=d.v;draw()},invsv(d){S.inv.sv=d.v;draw()},
+  nprod(){prodForm()},eprod(d){prodForm(d.id)},vlotes(d){lotesModal(d.id)},ilote(d){loteForm(d.id)},
+  ajus(d){const p=D.productos[d.id],l=d.l||(lotesOf(p)[0]||{}).lid;if(!l){toast('Este producto no tiene stock para ajustar.',1);return}ajusForm(d.id,l)},
+  dprod(d){const p=D.productos[d.id];write('productos',d.id,{activo:false},'merge');log('Quitó producto del catálogo',p.nombre);closeM();toast('Producto quitado del catálogo')},
+  ocpdf(d){ocPdf(d.v)},occopy(d){copy(pedidoTxt(d.v))},
+  postab(d){S.pos.tab=d.v;draw()},
+  posadd(d){const it=S.pos.it.find(i=>i.pid===d.id&&i.modo===d.m);if(it)it.cant++;else S.pos.it.push({k:nid(),pid:d.id,modo:d.m,cant:1});draw();const q=$('#posq');if(q){q.focus();q.select()}},
+  posalt(d){S.pos.q=d.q;draw()},
+  posdel(d){S.pos.it=S.pos.it.filter(i=>i.k!==d.k);draw()},
+  posclr(){S.pos.it=[];draw()},
+  vender(d,el){vender(el)},
+  facpdf(d){const v=D.ventas[d.id];if(v)facPdf(v)},
+  anular(d){anular(d.id)},
+  cobrar(d){const v=D.ventas[d.id];col('ventas').doc(d.id).update({cobrado:true,cobradoT:Date.now(),cobradoPor:UDOC.nombre||uName(UDOC)}).then(()=>{log('Registró cobro',v.nro+' · '+v.cli.n);toast('Factura marcada como cobrada')}).catch(werr);v.cobrado=true;draw()},
+  reccsv(){const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',r=[['Fecha','Factura','Producto','Lote','Cantidad','Médico','Registro','Paciente','CI','Receta N°','Fecha receta'].join(',')];recRows(S.pos.mes).forEach(([v,i])=>r.push([v.fecha,v.nro,i.n,(i.lotes||[]).map(l=>l.l).join(' '),i.cant,v.rec.med,v.rec.reg,v.rec.pac,v.rec.ci,v.rec.nro,v.rec.fec].map(q).join(',')));bajar('Libro de recetas '+S.pos.mes+'.csv','\ufeff'+r.join('\r\n'),'text/csv')},
   nav(d){S.view=d.v;if(d.v==='auditoria')S.aud=null;draw()},
   dnav(d){S.dv=d.v;draw()},
   salir(){closeM();auth.signOut()},
@@ -980,7 +1426,7 @@ const A={
   dmed(d){const m=D.medicos[d.id];write('medicos',d.id,null,'del');write('firmas',d.id,null,'del');log('Eliminó médico',m.nombre);closeM()},
   nuser(){const max=(EMP&&EMP.maxUsuarios)||0;if(max&&Object.keys(D.usuarios).length>=max){toast('Tu membresía incluye hasta '+max+' usuarios. Pedí una ampliación a tu proveedor.',1);return}userForm()},
   togu(d){const u=D.usuarios[d.id];fs.doc('usuarios/'+d.id).update({activo:u.activo===false}).catch(werr);log(u.activo===false?'Activó usuario':'Desactivó usuario',uName(u))},
-  rolu(d){const u=D.usuarios[d.id],n={recepcion:'medico',medico:'admin',admin:'recepcion'}[u.rol]||'recepcion';fs.doc('usuarios/'+d.id).update({rol:n}).catch(werr);log('Cambió rol de usuario',uName(u)+' → '+ROLN[n]);toast(u.nombre+' ahora es '+ROLN[n])},
+  rolu(d){const u=D.usuarios[d.id],n={recepcion:'medico',medico:'farmacia',farmacia:'admin',admin:'recepcion'}[u.rol]||'recepcion';fs.doc('usuarios/'+d.id).update({rol:n}).catch(werr);log('Cambió rol de usuario',uName(u)+' → '+ROLN[n]);toast(u.nombre+' ahora es '+ROLN[n])},
   demo(){demo();log('Cargó datos de ejemplo');toast('Datos de ejemplo cargados')},
   deldemo(){delDemo()},
   /* desarrollador */
@@ -1025,6 +1471,8 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target.id==='rxq'){e.preventDefault();const v=e.target.value.trim();if(v){syncRx();S.t.rx.push({m:v,i:''});$('#rxc').innerHTML=rxRows();e.target.value='';$('#rxs').innerHTML=''}}
 });
 const I={
+  invq(v){S.inv.q=v;$('#invlist').innerHTML=invRows()},
+  posq(v){S.pos.q=v;$('#posres').innerHTML=posRes()},
   agq(v){S.ag.q=v;$('#agres').innerHTML=agRes()},
   pq(v){S.pq=v;$('#paclist').innerHTML=pacRows()},
   hq(v){S.hq=v;$('#hlist').innerHTML=pickRows(v,'pac')},
@@ -1034,6 +1482,16 @@ const I={
 };
 document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.i;if(k&&I[k])I[k](e.target.value)});
 const C={
+  invt(el){S.inv.t=el.value;$('#invlist').innerHTML=invRows()},
+  posc(el){const it=S.pos.it.find(i=>i.k===el.dataset.k);if(it){it.cant=Math.max(1,Math.round(+el.value||1))}draw()},
+  posm(el){const it=S.pos.it.find(i=>i.k===el.dataset.k);if(it)it.modo=el.value;draw()},
+  posdia(el){if(el.value){S.pos.dia=el.value;draw()}},
+  posmes(el){if(el.value){S.pos.mes=el.value;draw()}},
+  pf(el){const f=S.pos.f,n=el.name;f[n]=el.type==='checkbox'?el.checked:el.value;
+    if(n==='seg'){const s=segs().find(x=>x.n===el.value);f.pct=s?s.pct:''}
+    if(n==='cli'||n==='rpac'){const p=pacList().find(x=>norm(x.nombre)===norm(el.value));if(p){if(n==='cli'&&!f.ruc)f.ruc=p.ci||'';if(n==='rpac'&&!f.rci)f.rci=p.ci||'';if(n==='cli'&&!f.rpac){f.rpac=p.nombre;f.rci=f.rci||p.ci||''}draw()}}
+    if(n==='rmid'){const m=D.medicos[el.value];if(m){f.rmed=m.nombre;f.rreg=m.reg||''}}
+    if(el.dataset.r||n==='rmid')draw();else{const t=$('#postot');if(t)t.innerHTML=posTot(posCalc())}},
   agf(el){if(el.value){S.ag.f=el.value;draw()}},
   agmid(el){S.ag.mid=el.value;draw()},
   cajaf(el){if(el.value){S.cajaF=el.value;draw()}},
@@ -1050,6 +1508,29 @@ const C={
 };
 document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.c;if(k&&C[k])C[k](e.target)});
 const F={
+  prod(v){const id=v.id||nid(),old=v.id?D.productos[v.id]:{};const x=Math.max(1,Math.round(+v.xcaja||1));
+    const p={nombre:v.nombre.trim(),mono:v.mono.trim(),lab:v.lab.trim(),codigo:v.codigo.trim(),tipo:v.tipo,frio:v.frio==='1',iva:+v.iva,ucompra:v.ucompra.trim()||'Caja',uventa:v.uventa.trim()||'Unidad',xcaja:x,fracc:v.fracc==='1'&&x>1,pcaja:+v.pcaja||0,punid:+v.punid||0,minC:Math.max(0,Math.round(+v.minC||0)),prov:v.prov.trim(),activo:true};
+    if(v.id)write('productos',id,p,'merge');else write('productos',id,Object.assign(p,{lotes:{}}),'set');
+    log(v.id?'Modificó producto':'Creó producto',p.nombre);closeM();toast('Producto guardado')},
+  lote(v){const p=D.productos[v.id],u=Math.round(+v.cajas||0)*xc(p)+Math.round(+v.sueltas||0);if(u<=0){toast('Ingresá una cantidad mayor a cero.',1);return}
+    const l=v.l.trim(),ex=Object.entries(p.lotes||{}).find(([k,x])=>x.l===l&&x.v===v.v),lid=ex?ex[0]:nid(),FV=firebase.firestore.FieldValue,now=Date.now();
+    const upd=ex?{['lotes.'+lid+'.c']:FV.increment(u)}:{['lotes.'+lid]:{l,v:v.v,c:u,ing:hoy(),costo:+v.costo||0,prov:v.prov.trim(),fac:v.fac.trim()}};
+    if(ex){p.lotes[lid].c+=u}else{p.lotes=p.lotes||{};p.lotes[lid]=upd['lotes.'+lid]}render();
+    const b=fs.batch();b.update(col('productos').doc(v.id),upd);b.set(col('movs').doc(),{t:now,tipo:'ingreso',pid:v.id,n:p.nombre,l,c:u,ref:v.fac.trim(),uid:ME.uid});b.commit().catch(werr);
+    log('Ingresó lote',p.nombre+' · lote '+l+' · '+fmtU(p,u));closeM();toast('Lote ingresado: '+fmtU(p,u))},
+  ajus(v){const p=D.productos[v.id],l=p.lotes[v.lid],c=Math.max(0,Math.round(+v.c||0)),nuevo=v.tipo==='baja'?Math.max(0,l.c-c):c,dif=nuevo-l.c;if(!dif){closeM();return}
+    const b=fs.batch();b.update(col('productos').doc(v.id),{['lotes.'+v.lid+'.c']:firebase.firestore.FieldValue.increment(dif)});b.set(col('movs').doc(),{t:Date.now(),tipo:v.tipo==='baja'?'baja':'ajuste',pid:v.id,n:p.nombre,l:l.l,c:dif,ref:v.motivo.trim(),uid:ME.uid});b.commit().catch(werr);
+    l.c=nuevo;render();log(v.tipo==='baja'?'Dio de baja stock':'Ajustó stock',p.nombre+' · lote '+l.l+' · '+(dif>0?'+':'')+dif+' · '+v.motivo.trim());closeM();toast('Stock actualizado')},
+  temp(v,form){const t=Math.round(+v.t*10)/10;if(!isFinite(t)){return}const h=hoy(),d=new Date(),r={h:p2(d.getHours())+':'+p2(d.getMinutes()),t,n:UDOC.nombre||uName(UDOC)};
+    col('temperaturas').doc(h).set({fecha:h,r:firebase.firestore.FieldValue.arrayUnion(r)},{merge:true}).catch(werr);D.temperaturas[h]=D.temperaturas[h]||{fecha:h,r:[]};D.temperaturas[h].r=(D.temperaturas[h].r||[]).concat(r);
+    const mn=+(cfF().tmin??2),mx=+(cfF().tmax??8);if(t<mn||t>mx){log('Temperatura de heladera fuera de rango',t+' °C');toast('Temperatura fuera de rango: revisá la heladera.',1)}else toast('Temperatura registrada');draw()},
+  traz(v){buscarTraz(v.l)},
+  fac(v){if(v.vhasta<v.vdesde){toast('La vigencia “hasta” debe ser posterior a “desde”.',1);return}
+    const d={razon:v.razon.trim(),ruc:v.ruc.trim(),act:v.act.trim(),dir:v.dir.trim(),tel:v.tel.trim(),timbrado:v.timbrado.replace(/\D/g,''),vdesde:v.vdesde,vhasta:v.vhasta,est:v.est,pto:v.pto,desde:Math.max(1,Math.round(+v.desde||1)),tipoDoc:v.tipoDoc,formato:v.formato};
+    write('config','facturacion',d,'set');col('contadores').doc('factura').set({timbrado:d.timbrado,n:d.desde}).catch(werr);
+    log('Configuró facturación','Timbrado '+d.timbrado+' · próxima '+nroFac(d,d.desde));toast('Facturación guardada. Próxima factura: '+nroFac(d,d.desde))},
+  farm(v){const seguros=v.seguros.split('\n').map(l=>l.split(';').map(x=>x.trim())).filter(a=>a[0]).map(a=>({n:a[0],pct:Math.min(100,Math.max(0,+a[1]||0)),ruc:a[2]||''}));
+    write('config','farmacia',{seguros,alertaDias:Math.max(1,Math.round(+v.alertaDias||90)),tmin:+v.tmin,tmax:+v.tmax},'set');log('Configuró seguros y farmacia');toast('Guardado')},
   async login(v,form){const b=form.querySelector('button');b.disabled=true;try{await auth.signInWithEmailAndPassword(await cuentaDe(v.email),v.pass)}catch(e){b.disabled=false;toast(authMsg(e),1)}},
   async cambiar(v){
     if(v.p1!==v.p2){toast('Las contraseñas no coinciden.',1);return}
